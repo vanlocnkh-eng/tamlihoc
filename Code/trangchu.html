@@ -204,8 +204,12 @@ if(savedUser) {
 }
 
 function logout(){
-    localStorage.removeItem("user");
-    window.location.href="index.html";
+    // Hiển thị hộp thoại hỏi xác nhận trước khi đăng xuất
+    if(confirm("Bạn có chắc chắn muốn đăng xuất không?")) {
+        alert("Đăng xuất thành công! Hệ thống đang chuyển hướng về trang đăng nhập...");
+        localStorage.removeItem("user");
+        window.location.href = "index.html"; // Chuyển hướng về trang index.html
+    }
 }
 
 // Logic Mở/Đóng Modal và Sao
