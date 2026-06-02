@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra Linh hoạt Nhận thức</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root { --shape-size: 150px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body {
+            min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(-45deg, #ff9a9e, #fecfef, #f6d365, #fda085); background-size: 400% 400%; animation: bgmove 15s ease infinite; color: #333;
+        }
+        @keyframes bgmove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .container { width: 100%; max-width: 850px; margin: auto; text-align: center; }
+        .screen-box { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); backdrop-filter: blur(10px); }
+        .screen { display: none; width: 100%; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        h2 { color: #e67e22; margin-bottom: 20px; font-size: 2em; }
+        
+        .btn { padding: 12px 20px; font-size: 16px; font-weight: bold; color: white; background-color: #e67e22; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn:hover { transform: scale(1.05); background-color: #d35400; box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4); }
+        .btn-secondary { background-color: #ff4757; color: white; }
+        .btn-secondary:hover { background-color: #ff2a3d; box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4); }
+        
+        /* CSS CHỈNH LẠI CÁC NÚT CHỌN MỨC ĐỘ */
+        .level-options {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: stretch; /* Ép các nút có cùng chiều cao */
+            gap: 15px; /* Khoảng cách giữa các nút */
+            width: 100%;
+            margin-top: 20px;
+        }
+        .btn-level {
+            flex: 1; /* Ép các nút có chiều rộng bằng nhau */
+            padding: 15px 10px;
+            font-size: 16px;
+            background-color: #f39c12;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.4;
+        }
+        /* Tự động xếp dọc nếu màn hình điện thoại nhỏ */
+        @media (max-width: 700px) {
+            .level-options { flex-direction: column; }
+        }
+
+        #gameInfo { display: flex; justify-content: space-around; font-size: 1.2em; font-weight: bold; margin-bottom: 20px; color: #555; background: rgba(0, 0, 0, 0.05); padding: 15px; border-radius: 15px; flex-wrap: wrap; gap: 10px; }
+        .time-warning { color: #ff4757 !important; animation: pulse 1s infinite alternate; }
+        #ruleDisplay { font-size: 1.5em; font-weight: bold; color: #fff; background-color: #e74c3c; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
+        #stimulusArea { width: 100%; height: 260px; display: flex; justify-content: center; align-items: center; border: 3px dashed #ccc; border-radius: 15px; background: #f9f9f9; position: relative; margin-bottom: 20px; }
+        #stimulusShape { width: var(--shape-size); height: var(--shape-size); visibility: hidden; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
+        #stimulusShape.circle { border-radius: 50%; }
+        #stimulusShape.square { border-radius: 15px; }
+        .action-buttons { display: flex; justify-content: center; gap: 20px; margin: 20px 0; }
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal.active { display: flex; animation: fadeIn 0.3s; }
+        .modal-content { background-color: #fff; padding: 35px; border-radius: 20px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 15px 40px rgba(0,0,0,0.2); position: relative; }
+        .modal-close { position: absolute; top: 15px; right: 25px; font-size: 35px; font-weight: bold; color: #aaa; cursor: pointer; }
+        #historyContent { max-height: 250px; overflow-y: auto; text-align: left; margin-top: 15px; }
+        .history-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="color:white; margin-bottom:20px; text-shadow:0 0 10px rgba(0,0,0,0.1);">🔀 ĐÁNH GIÁ SỰ LINH HOẠT NHẬN THỨC</h1>
+        <div class="screen-box">
+            
+            <!-- Màn hình 1: Chọn Chế Độ Đo Lường -->
+            <div id="levelSelectScreen" class="screen active">
+                <h2>Chọn Chế Độ Đo Lường</h2>
+                
+                <!-- Bọc các nút trong div .level-options để dùng Flexbox chia đều kích thước -->
+                <div class="level-options">
+                    <button class="btn btn-level" data-mode="color">Phân loại theo MÀU SẮC</button>
+                    <button class="btn btn-level" data-mode="shape">Phân loại theo HÌNH KHỐI</button>
+                    <button class="btn btn-level" data-mode="switch">KẾT HỢP (Chuyển đổi liên tục)</button>
+                </div>
+                
+                <!-- Nút Về Trang Chủ -->
+                <div style="margin-top: 30px;">
+                    <a href="trangchu.html" class="btn btn-secondary">🏠 Về Trang Chủ</a>
+                </div>
+            </div>
+
+            <!-- Màn hình 2: Màn hình Game -->
+            <div id="gameScreen" class="screen">
+                <div id="gameInfo">
+                    <div id="gameTimer">⏱️ Thời gian: 4:00</div>
+                    <div id="gameTrials">🔄 Lượt chơi: 0/20</div>
+                    <div id="gameScore">✅ Đúng: 0</div>
+                    <div id="gameErrors">❌ Sai: 0</div>
+                </div>
+                <div id="ruleDisplay">QUY TẮC: CHUẨN BỊ</div>
+                <div id="stimulusArea"><div id="stimulusShape"></div></div>
+                <div class="action-buttons" id="gameButtons"></div>
+                <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
+                    <button class="btn" id="quitGameBtn" style="background:#7f8c8d;">Thử chế độ khác</button>
+                    <a href="trangchu.html" class="btn btn-secondary">🏠 Về Trang Chủ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Kết Quả -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeResultModal">&times;</span>
+            <h2 id="resultTitle">🎉 Kết Quả Thử Thách</h2>
+            <p id="resultTrials" style="font-size: 1.1em; margin: 8px 0;"></p>
+            <p id="resultAccuracy" style="font-weight: bold; color: #2ecc71; font-size: 1.2em; margin: 8px 0;"></p>
+            <p id="resultRT" style="font-size: 1.1em; margin: 8px 0;"></p>
+            <h4 id="resultRisk" style="color: #e67e22; font-size: 1.2em; margin: 10px 0;"></h4>
+            <p id="resultAdvice" style="color: #555; font-style: italic;"></p>
+            <div class="modal-buttons">
+                <button class="btn" id="exportPDFBtn">📥 Tải báo cáo PDF</button>
+                <button class="btn" style="background:#f39c12;" id="playAgainBtn">🔄 Chơi lại</button>
+                <button class="btn btn-secondary" id="viewHistoryBtn">📜 Lịch sử</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Lịch Sử -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeHistoryModal">&times;</span>
+            <h2>Lịch sử kiểm tra linh hoạt</h2>
+            <div id="historyContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CẤU HÌNH GOOGLE SHEETS
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCcMzIe1zk1_6ZJXpp4IOt6ihxp_kWbc-S2ywvIuBYmuXL54bZTQhJ1h385ijfRR7Pqw/exec"; 
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const playApplauseSound = () => {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const bufferSize = ctx.sampleRate * 2.0; const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate); const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                    const noise = ctx.createBufferSource(); noise.buffer = buffer;
+                    const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1000; filter.Q.value = 1.5;
+                    const gainNode = ctx.createGain(); gainNode.gain.setValueAtTime(0.4, ctx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 2.0);
+                    noise.connect(filter); filter.connect(gainNode); gainNode.connect(ctx.destination); noise.start();
+                } catch(e){}
+            };
+
+            // Lấy thông tin User để gửi Google Sheets
+            let savedUser = localStorage.getItem("user");
+            let userInfo = { name: "Người chơi ẩn danh", class: "Không xác định", school: "", age: "N/A" };
+            if (savedUser) {
+                let parsed = JSON.parse(savedUser);
+                userInfo.name = parsed.name || "Người chơi ẩn danh";
+                userInfo.class = parsed.class || "Không xác định";
+                userInfo.school = parsed.school || "";
+                userInfo.age = parsed.age || "N/A";
+            }
+
+            let testMode = 'switch', timerInterval = null, timeRemaining = 240, totalTrials = 20, currentTrial = 0;
+            let correctCount = 0, errorCount = 0, totalReactionTime = 0, trialStartTime = 0;
+            let currentRule = 'color', currentShape = '', currentColor = '';
+            let currentGameResult = {};
+
+            const screens = { level: document.getElementById('levelSelectScreen'), game: document.getElementById('gameScreen') };
+            const modals = { result: document.getElementById('resultModal'), history: document.getElementById('historyModal') };
+            const shapeEl = document.getElementById('stimulusShape');
+            const ruleDisplay = document.getElementById('ruleDisplay');
+            const btnArea = document.getElementById('gameButtons');
+
+            document.getElementById('levelSelectScreen').addEventListener('click', (e) => {
+                if (e.target.matches('.btn-level')) {
+                    testMode = e.target.getAttribute('data-mode');
+                    startGame();
+                }
+            });
+
+            function startGame() {
+                currentTrial = 0; correctCount = 0; errorCount = 0; totalReactionTime = 0; timeRemaining = 240;
+                updateStats();
+                document.getElementById('gameTimer').classList.remove('time-warning');
+                screens.level.classList.remove('active'); screens.game.classList.add('active');
+                
+                buildActionButtons();
+                nextTrial();
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    timeRemaining--;
+                    let m = Math.floor(timeRemaining / 60), s = timeRemaining % 60;
+                    document.getElementById('gameTimer').textContent = `⏱️ Thời gian: ${m}:${s < 10 ? '0' : ''}${s}`;
+                    if (timeRemaining <= 30) document.getElementById('gameTimer').classList.add('time-warning');
+                    if (timeRemaining <= 0) { alert("⏰ Hết thời gian 4 phút!"); endGame(false, true); }
+                }, 1000);
+            }
+
+            function buildActionButtons() {
+                btnArea.innerHTML = '';
+                if (testMode === 'color') {
+                    btnArea.innerHTML = `<button class="btn" style="background:#3498db" onclick="window.submitAnswer('blue')">Xanh dương</button>
+                                         <button class="btn" style="background:#e67e22" onclick="window.submitAnswer('orange')">Màu Cam</button>`;
+                } else if (testMode === 'shape') {
+                    btnArea.innerHTML = `<button class="btn" style="background:#2c3e50" onclick="window.submitAnswer('circle')">Hình Tròn</button>
+                                         <button class="btn" style="background:#2c3e50" onclick="window.submitAnswer('square')">Hình Vuông</button>`;
+                } else {
+                    btnArea.innerHTML = `<button class="btn" style="background:#3498db" onclick="window.submitAnswer('blue')">Xanh</button>
+                                         <button class="btn" style="background:#e67e22" onclick="window.submitAnswer('orange')">Cam</button>
+                                         <button class="btn" style="background:#7f8c8d" onclick="window.submitAnswer('circle')">Tròn</button>
+                                         <button class="btn" style="background:#7f8c8d" onclick="window.submitAnswer('square')">Vuông</button>`;
+                }
+            }
+
+            function nextTrial() {
+                if (currentTrial >= totalTrials) { endGame(false, false); return; }
+                currentTrial++;
+                updateStats();
+
+                currentShape = Math.random() > 0.5 ? 'circle' : 'square';
+                currentColor = Math.random() > 0.5 ? 'blue' : 'orange';
+
+                if (testMode === 'switch') {
+                    currentRule = Math.random() > 0.5 ? 'color' : 'shape';
+                } else { currentRule = testMode; }
+
+                if (currentRule === 'color') {
+                    ruleDisplay.textContent = "QUY TẮC: CHỌN MÀU SẮC"; ruleDisplay.style.backgroundColor = "#e74c3c";
+                } else { ruleDisplay.textContent = "QUY TẮC: CHỌN HÌNH KHỐI"; ruleDisplay.style.backgroundColor = "#9b59b6"; }
+
+                shapeEl.className = currentShape;
+                shapeEl.style.backgroundColor = currentColor === 'blue' ? '#3498db' : '#e67e22';
+                shapeEl.style.visibility = 'visible';
+                trialStartTime = performance.now();
+            }
+
+            window.submitAnswer = (ans) => {
+                let rt = (performance.now() - trialStartTime) / 1000;
+                totalReactionTime += rt;
+
+                let isCorrect = false;
+                if (currentRule === 'color' && ans === currentColor) isCorrect = true;
+                if (currentRule === 'shape' && ans === currentShape) isCorrect = true;
+
+                if (isCorrect) correctCount++; else errorCount++;
+                shapeEl.style.visibility = 'hidden';
+                setTimeout(nextTrial, 300);
+            };
+
+            function updateStats() {
+                document.getElementById('gameTrials').textContent = `🔄 Lượt chơi: ${currentTrial}/${totalTrials}`;
+                document.getElementById('gameScore').textContent = `✅ Đúng: ${correctCount}`;
+                document.getElementById('gameErrors').textContent = `❌ Sai: ${errorCount}`;
+            }
+
+            // Gửi dữ liệu lên Google Sheets
+            function saveGameScoreToSheet(resultObj) {
+                let schoolClassInfo = userInfo.class + (userInfo.school ? " - " + userInfo.school : "");
+                let elapsed = 240 - timeRemaining; 
+                let modeName = resultObj.mode === 'color' ? 'Màu Sắc' : (resultObj.mode === 'shape' ? 'Hình Khối' : 'Kết Hợp');
+                
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: "save_score",
+                        name: userInfo.name,                         
+                        schoolClass: schoolClassInfo,                 
+                        gameName: `Flexibility Test (${modeName})`, 
+                        score: `Đúng: ${correctCount} | Sai: ${errorCount}`,    
+                        timePlayed: elapsed + " giây",         
+                        accuracy: `${resultObj.accuracy}% (Nguy cơ: ${resultObj.risk})` 
+                    })
+                }).then(() => {
+                    console.log("Đã gửi điểm lên Google Sheets thành công!");
+                }).catch(err => console.log("Lỗi gửi điểm:", err));
+            }
+
+            function endGame(isQuit=false, isTimeout=false) {
+                clearInterval(timerInterval);
+                if (isQuit) return;
+
+                let acc = (correctCount / totalTrials) * 100;
+                let avgRT = correctCount > 0 ? (totalReactionTime / totalTrials).toFixed(2) : 0;
+                
+                let risk = "Thấp", advice = "Độ linh hoạt tư duy tốt, khả năng chuyển đổi quy tắc mượt mà.";
+                if (isTimeout || acc < 60 || avgRT > 2.0) { risk = "Cao"; advice = "Bạn gặp khó khăn khi thay đổi môi trường hoặc luật chơi. Hãy rèn luyện thêm."; }
+                else if (acc < 85 || avgRT > 1.3) { risk = "Trung bình"; advice = "Chính xác tương đối tốt, cần tăng tốc phân loại nhanh nhẹn hơn."; }
+
+                currentGameResult = { date: new Date().toISOString(), mode: testMode, accuracy: acc.toFixed(0), avgRT, risk, advice };
+                
+                // Lưu vào LocalStorage
+                let history = JSON.parse(localStorage.getItem('flexHistory')) || []; 
+                history.unshift(currentGameResult); 
+                localStorage.setItem('flexHistory', JSON.stringify(history));
+
+                // Bắn dữ liệu về Google Sheets
+                saveGameScoreToSheet(currentGameResult);
+
+                if (!isTimeout) {
+                    document.getElementById('resultTitle').textContent = `🎉 Thử Thách Hoàn Thành!`;
+                    playApplauseSound();
+                    let duration = 1500, end = Date.now() + duration;
+                    let interval = setInterval(() => {
+                        if (Date.now() > end) return clearInterval(interval);
+                        confetti({ startVelocity: 30, spread: 360, ticks: 60, origin: { x: Math.random() * 0.3, y: Math.random() - 0.2 } });
+                        confetti({ startVelocity: 30, spread: 360, ticks: 60, origin: { x: Math.random() * 0.3 + 0.7, y: Math.random() - 0.2 } });
+                    }, 250);
+                } else { document.getElementById('resultTitle').textContent = `⏰ Quá thời gian 4 phút!`; }
+
+                document.getElementById('resultTrials').textContent = `🔄 Số lượt hoàn tất: ${currentTrial}/20`;
+                document.getElementById('resultAccuracy').textContent = `🎯 Độ chính xác: ${acc.toFixed(0)}%`;
+                document.getElementById('resultRT').textContent = `⏱️ Phản xạ trung bình: ${avgRT} giây`;
+                document.getElementById('resultRisk').textContent = `Nguy cơ: ${risk}`;
+                document.getElementById('resultAdvice').textContent = `💡 Lời khuyên: ${advice}`;
+                modals.result.classList.add('active');
+            }
+
+            document.getElementById('quitGameBtn').addEventListener('click', () => { if(confirm('Thoát game?')) { endGame(true); screens.game.classList.remove('active'); screens.level.classList.add('active'); } });
+            document.getElementById('playAgainBtn').addEventListener('click', () => { modals.result.classList.remove('active'); screens.game.classList.remove('active'); screens.level.classList.add('active'); });
+            document.getElementById('closeResultModal').addEventListener('click', () => modals.result.classList.remove('active'));
+            document.getElementById('closeHistoryModal').addEventListener('click', () => modals.history.classList.remove('active'));
+            document.getElementById('viewHistoryBtn').addEventListener('click', () => {
+                let history = JSON.parse(localStorage.getItem('flexHistory')) || [];
+                let content = document.getElementById('historyContent'); content.innerHTML = history.length ? '' : '<p>Chưa có lịch sử.</p>';
+                history.forEach(item => {
+                    content.innerHTML += `<div class="history-item"><b>📅 Chế độ:</b> ${item.mode} | Chính xác: ${item.accuracy}%<br>⏱️ Phản xạ: ${item.avgRT}s | <span style="color:red">Nguy cơ: ${item.risk}</span></div>`;
+                });
+                modals.result.classList.remove('active'); modals.history.classList.add('active');
+            });
+            document.getElementById('exportPDFBtn').addEventListener('click', () => {
+                const { jsPDF } = jspdf; const doc = new jsPDF();
+                doc.text("BAO CAO DO LUONG LINH HOAT NHAN THUC", 10, 20);
+                doc.text(`Chinh xac: ${currentGameResult.accuracy}% | Phan xa: ${currentGameResult.avgRT}s`, 10, 35);
+                doc.text(`Danh gia nguy co: ${currentGameResult.risk}`, 10, 50);
+                doc.save(`Flexibility_Report_${userInfo.name}.pdf`);
+            });
+        });
+    </script>
+</body>
+</html>

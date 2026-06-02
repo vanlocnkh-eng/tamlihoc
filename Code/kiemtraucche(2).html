@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stop the Game (Go/No-Go) - Sàng lọc Nhận thức</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root { --stimulus-size: 160px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body {
+            min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(-45deg, #a18cd1, #fbc2eb, #ff9a9e, #fecfef); background-size: 400% 400%; animation: bgmove 12s ease infinite; color: #333;
+        }
+        @keyframes bgmove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .container { width: 100%; max-width: 850px; margin: auto; text-align: center; }
+        .screen-box { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); backdrop-filter: blur(10px); }
+        .screen { display: none; width: 100%; }
+        .screen.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        h2 { color: #8e44ad; margin-bottom: 20px; font-size: 1.8em; }
+        .btn { padding: 12px 20px; font-size: 16px; font-weight: bold; color: white; background-color: #8e44ad; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn:hover { transform: scale(1.05); background-color: #732d91; box-shadow: 0 6px 20px rgba(142, 68, 173, 0.4); }
+        .btn-secondary { background-color: #ff4757; color: white; }
+        .btn-secondary:hover { background-color: #ff2a3d; box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4); }
+        .btn-level { width: 280px; margin: 10px; padding: 15px; font-size: 18px; background-color: #3498db; color: #fff; }
+        #gameInfo { display: flex; justify-content: space-around; font-size: 1.2em; font-weight: bold; margin-bottom: 20px; color: #555; background: rgba(0, 0, 0, 0.05); padding: 15px; border-radius: 15px; flex-wrap: wrap; gap: 10px; }
+        .time-warning { color: #ff4757 !important; animation: pulse 1s infinite alternate; }
+        #stimulusArea { width: 100%; height: 250px; display: flex; justify-content: center; align-items: center; border: 3px dashed #ccc; border-radius: 15px; background: #f9f9f9; position: relative; margin-bottom: 20px; }
+        #stimulus { font-size: 100px; transform: scale(0); transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275); user-select: none; }
+        
+        /* Cấu trúc lưới được mở rộng max-width và chữ nằm trên 1 dòng */
+        .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 15px auto 25px auto; max-width: 780px; }
+        .char-item { 
+            cursor: pointer; background: #fff; padding: 12px 8px; border-radius: 12px; border: 2px solid #ddd; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;
+        }
+        .char-item:hover { border-color: #8e44ad; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .char-icon { font-size: 32px; line-height: 1; }
+        
+        /* Thu nhỏ font size vừa vặn và ép không xuống dòng */
+        .char-text { font-size: 16px; color: #333; font-weight: 500; white-space: nowrap; }
+
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal.active { display: flex; animation: fadeIn 0.3s; }
+        .modal-content { background-color: #fff; padding: 35px; border-radius: 20px; width: 90%; max-width: 600px; text-align: center; position: relative; }
+        #historyContent { max-height: 250px; overflow-y: auto; text-align: left; margin-top: 15px; }
+        .history-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="color:white; margin-bottom:20px; text-shadow:0 0 10px rgba(0,0,0,0.1);">🛑 TRÒ CHƠI KIỂM TRA KHẢ NĂNG ỨC CHẾ</h1>
+        <div class="screen-box">
+            
+            <div id="characterScreen" class="screen active">
+                <h2>Chọn Nhân Vật Bạn Thích</h2>
+                
+                <div class="char-grid">
+                    <div class="char-item" onclick="window.setChars('🟢','🔴')">
+                        <div class="char-icon">🟢</div>
+                        <div class="char-text">Nhấn 🟢 / Dừng 🔴</div>
+                    </div>
+                    <div class="char-item" onclick="window.setChars('🚗','🛑')">
+                        <div class="char-icon">🚗</div>
+                        <div class="char-text">Nhấn 🚗 / Dừng 🛑</div>
+                    </div>
+                    <div class="char-item" onclick="window.setChars('🐱','🐯')">
+                        <div class="char-icon">🐱</div>
+                        <div class="char-text">Nhấn 🐱 / Dừng 🐯</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 25px;">
+                    <a href="trangchu.html" class="btn btn-secondary">🏠 Về Trang Chủ</a>
+                </div>
+            </div>
+            
+            <div id="levelSelectScreen" class="screen">
+                <h2>Chọn Cấp Độ Thử Thách</h2>
+                <div>
+                    <button class="btn btn-level" data-mode="basic">Cơ bản (Tỉ lệ dừng 20%)</button>
+                    <button class="btn btn-level" data-mode="challenge" style="background:#e67e22;">Thách thức (Tỉ lệ dừng 40%)</button>
+                </div>
+                
+                <div style="margin-top: 25px;">
+                    <a href="trangchu.html" class="btn btn-secondary">🏠 Về Trang Chủ</a>
+                </div>
+            </div>
+
+            <div id="gameScreen" class="screen">
+                <div id="gameInfo">
+                    <div id="gameTimer">⏱️ Thời gian: 4:00</div>
+                    <div id="gameProgress">🔄 Tiến trình: 0/30</div>
+                    <div id="gameScore">✅ Đúng: 0</div>
+                    <div id="gameErrors">❌ Sai sót: 0</div>
+                </div>
+                <div id="stimulusArea"><div id="stimulus">-</div></div>
+                <button class="btn" id="actionBtn" style="font-size:22px; padding:15px 50px; width:80%;">BẤM NGAY! (Space)</button>
+                <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
+                    <button class="btn" id="quitGameBtn" style="background:#7f8c8d;">Thử lại mức khác</button>
+                    <a href="trangchu.html" class="btn btn-secondary">🏠 Về Trang Chủ</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeResultModal" style="position:absolute; right:20px; top:15px; font-size:30px; cursor:pointer;">&times;</span>
+            <h2 id="resultTitle">🎉 Kết Quả Đo Lường</h2>
+            <p id="resultScore" style="font-size:1.2em; margin:10px 0;"></p>
+            <h4 id="resultRisk" style="color: #ff9f43; font-size: 1.2em; margin: 10px 0;"></h4>
+            <p id="resultAdvice" style="color: #555; font-style: italic;"></p>
+            <div class="modal-buttons" style="margin-top:20px; display:flex; justify-content:center; gap:10px;">
+                <button class="btn" id="exportPDFBtn">📥 Tải PDF</button>
+                <button class="btn" style="background:#43e97b;" id="playAgainBtn">Chơi lại</button>
+                <button class="btn btn-secondary" id="viewHistoryBtn">Lịch sử</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeHistoryModal" style="position:absolute; right:20px; top:15px; font-size:30px; cursor:pointer;">&times;</span>
+            <h2>Lịch sử game Ức chế</h2>
+            <div id="historyContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CẤU HÌNH GOOGLE SHEETS
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCcMzIe1zk1_6ZJXpp4IOt6ihxp_kWbc-S2ywvIuBYmuXL54bZTQhJ1h385ijfRR7Pqw/exec"; 
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const playApplauseSound = () => {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const bufferSize = ctx.sampleRate * 2.0; const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate); const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+                    const noise = ctx.createBufferSource(); noise.buffer = buffer;
+                    const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1000; filter.Q.value = 1.5;
+                    const gainNode = ctx.createGain(); gainNode.gain.setValueAtTime(0.4, ctx.currentTime); gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 2.0);
+                    noise.connect(filter); filter.connect(gainNode); gainNode.connect(ctx.destination); noise.start();
+                } catch(e){}
+            };
+
+            let goChar = '🚗', noGoChar = '🛑', gameMode = 'basic';
+            let timerInterval = null, stimTimeout = null, nextStimTimeout = null, timeRemaining = 240;
+            let currentTrial = 0, totalTrials = 30, correctCount = 0, errorCount = 0, isGoTrial = true, userResponded = false;
+            
+            // Lấy thông tin User để lưu điểm
+            let savedUser = localStorage.getItem("user");
+            let userInfo = { name: "Người chơi ẩn danh", class: "Không xác định", school: "" };
+            if (savedUser) {
+                let parsed = JSON.parse(savedUser);
+                userInfo.name = parsed.name || "Người chơi ẩn danh";
+                userInfo.class = parsed.class || "Không xác định";
+                userInfo.school = parsed.school || "";
+            }
+
+            const screens = { char: document.getElementById('characterScreen'), level: document.getElementById('levelSelectScreen'), game: document.getElementById('gameScreen') };
+            const modals = { result: document.getElementById('resultModal'), history: document.getElementById('historyModal') };
+            const stimEl = document.getElementById('stimulus');
+
+            window.setChars = (go, nogo) => { goChar = go; noGoChar = nogo; screens.char.classList.remove('active'); screens.level.classList.add('active'); };
+
+            document.getElementById('levelSelectScreen').addEventListener('click', (e) => {
+                if (e.target.matches('.btn-level')) { gameMode = e.target.getAttribute('data-mode'); startGame(); }
+            });
+
+            function startGame() {
+                currentTrial = 0; correctCount = 0; errorCount = 0; timeRemaining = 240;
+                document.getElementById('gameTimer').classList.remove('time-warning');
+                screens.level.classList.remove('active'); screens.game.classList.add('active');
+                
+                updateStats();
+                startTimers();
+                nextTrial();
+            }
+
+            function startTimers() {
+                clearInterval(timerInterval);
+                timerInterval = setInterval(() => {
+                    timeRemaining--;
+                    let m = Math.floor(timeRemaining / 60), s = timeRemaining % 60;
+                    document.getElementById('gameTimer').textContent = `⏱️ Thời gian: ${m}:${s < 10 ? '0' : ''}${s}`;
+                    if (timeRemaining <= 30) document.getElementById('gameTimer').classList.add('time-warning');
+                    if (timeRemaining <= 0) { alert("⏰ Hết thời gian ván đấu!"); endGame(false, true); }
+                }, 1000);
+            }
+
+            function nextTrial() {
+                if(currentTrial >= totalTrials) { endGame(false, false); return; }
+                currentTrial++;
+                updateStats();
+                userResponded = false;
+
+                let noGoChance = gameMode === 'basic' ? 0.2 : 0.4;
+                isGoTrial = Math.random() >= noGoChance;
+
+                stimEl.textContent = isGoTrial ? goChar : noGoChar;
+                stimEl.style.transform = 'scale(1)';
+
+                clearTimeout(stimTimeout);
+                stimTimeout = setTimeout(() => {
+                    stimEl.style.transform = 'scale(0)';
+                    if (isGoTrial && !userResponded) { errorCount++; updateStats(); }
+                    else if (!isGoTrial && !userResponded) { correctCount++; updateStats(); }
+                    
+                    nextStimTimeout = setTimeout(nextTrial, 1000);
+                }, 1200);
+            }
+
+            function handleAction() {
+                if (userResponded) return; userResponded = true;
+                clearTimeout(stimTimeout);
+                stimEl.style.transform = 'scale(0)';
+
+                if (isGoTrial) { correctCount++; } else { errorCount++; }
+                updateStats();
+                nextStimTimeout = setTimeout(nextTrial, 800);
+            }
+
+            document.getElementById('actionBtn').addEventListener('click', handleAction);
+            document.addEventListener('keydown', (e) => { if(e.code==='Space' && screens.game.classList.contains('active')) { e.preventDefault(); handleAction(); } });
+
+            function updateStats() {
+                document.getElementById('gameProgress').textContent = `🔄 Tiến trình: ${currentTrial}/${totalTrials}`;
+                document.getElementById('gameScore').textContent = `✅ Đúng: ${correctCount}`;
+                document.getElementById('gameErrors').textContent = `❌ Sai sót: ${errorCount}`;
+            }
+
+            // Gửi dữ liệu lên Google Sheets
+            function saveGameScoreToSheet(resultObj) {
+                let schoolClassInfo = userInfo.class + (userInfo.school ? " - " + userInfo.school : "");
+                let elapsed = 240 - timeRemaining; // Tính số giây đã chơi
+                
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: "save_score",
+                        name: userInfo.name,                         
+                        schoolClass: schoolClassInfo,                 
+                        gameName: "Go/No-Go (" + resultObj.mode + ")", 
+                        score: `Đúng: ${correctCount} | Lỗi: ${errorCount}`,    
+                        timePlayed: elapsed + " giây",         
+                        accuracy: `${resultObj.accuracy}% (Nguy cơ: ${resultObj.risk})` 
+                    })
+                }).then(() => {
+                    console.log("Đã gửi điểm lên Google Sheets thành công!");
+                }).catch(err => console.log("Lỗi gửi điểm:", err));
+            }
+
+            function endGame(isQuit=false, isTimeout=false) {
+                clearInterval(timerInterval); clearTimeout(stimTimeout); clearTimeout(nextStimTimeout);
+                if (isQuit) return;
+
+                let acc = (correctCount / totalTrials) * 100;
+                let risk = acc >= 80 ? "Thấp" : (acc >= 60 ? "Trung bình" : "Cao");
+                let advice = risk === "Thấp" ? "Khả năng tự kiểm soát và kiềm chế hành vi rất tốt." : "Bạn có xu hướng phản xạ bốc đồng, cần bình tĩnh hơn.";
+                if (isTimeout) { risk = "Cao"; advice = "Quá giới hạn 4 phút của trò chơi."; }
+
+                let modeStr = gameMode === 'basic' ? 'Cơ bản' : 'Thách thức';
+                let result = { date: new Date().toISOString(), mode: modeStr, accuracy: acc.toFixed(0), risk, advice };
+                
+                // Lưu vào LocalStorage
+                let history = JSON.parse(localStorage.getItem('goNoGoHistory')) || []; 
+                history.unshift(result); 
+                localStorage.setItem('goNoGoHistory', JSON.stringify(history));
+
+                // Lưu lên Google Sheets
+                saveGameScoreToSheet(result);
+
+                if (!isTimeout) {
+                    document.getElementById('resultTitle').textContent = `🎉 Hoàn Thành Thử Thách!`;
+                    playApplauseSound();
+                    let duration = 1500, end = Date.now() + duration;
+                    let interval = setInterval(() => {
+                        if (Date.now() > end) return clearInterval(interval);
+                        confetti({ startVelocity: 30, spread: 360, ticks: 60, origin: { x: Math.random() * 0.3, y: Math.random() - 0.2 } });
+                        confetti({ startVelocity: 30, spread: 360, ticks: 60, origin: { x: Math.random() * 0.3 + 0.7, y: Math.random() - 0.2 } });
+                    }, 250);
+                } else { document.getElementById('resultTitle').textContent = `⏰ Quá Giờ Quy Định!`; }
+
+                document.getElementById('resultScore').textContent = `✅ Đúng: ${correctCount} | Lỗi bấm nhầm: ${errorCount}`;
+                document.getElementById('resultRisk').textContent = `Nguy cơ bốc đồng / Kém ức chế: ${risk}`;
+                document.getElementById('resultAdvice').textContent = `💡 Lời khuyên: ${advice}`;
+                modals.result.classList.add('active');
+            }
+
+            document.getElementById('quitGameBtn').addEventListener('click', () => { if(confirm('Hủy ván đo lường?')) { endGame(true); screens.game.classList.remove('active'); screens.level.classList.add('active'); } });
+            document.getElementById('playAgainBtn').addEventListener('click', () => { modals.result.classList.remove('active'); screens.game.classList.remove('active'); screens.char.classList.add('active'); });
+            document.getElementById('closeResultModal').addEventListener('click', () => modals.result.classList.remove('active'));
+            document.getElementById('closeHistoryModal').addEventListener('click', () => modals.history.classList.remove('active'));
+            document.getElementById('viewHistoryBtn').addEventListener('click', () => {
+                let history = JSON.parse(localStorage.getItem('goNoGoHistory')) || [];
+                let content = document.getElementById('historyContent'); content.innerHTML = history.length ? '' : '<p>Chưa có lịch sử.</p>';
+                history.forEach(item => { content.innerHTML += `<div class="history-item"><b>🎯 Chế độ:</b> ${item.mode} | Độ chính xác: ${item.accuracy}%<br><span style="color:red">Nguy cơ: ${item.risk}</span></div>`; });
+                modals.result.classList.remove('active'); modals.history.classList.add('active');
+            });
+            document.getElementById('exportPDFBtn').addEventListener('click', () => {
+                const { jsPDF } = jspdf; const doc = new jsPDF();
+                doc.text(`BAO CAO KIEM TRA UC CHE HANH VI - ${userInfo.name}`, 10, 20);
+                doc.text(`Dung: ${correctCount} | Loi bấm sai: ${errorCount}`, 10, 35);
+                doc.text(`Phan loai nguy co: ${risk}`, 10, 50);
+                doc.save(`Inhibition_Report_${userInfo.name}.pdf`);
+            });
+        });
+    </script>
+</body>
+</html>

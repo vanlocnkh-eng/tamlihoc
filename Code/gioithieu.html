@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giới thiệu về dự án nghiên cứu</title>
+    
+    <style>
+        /* === PHẦN CSS - PHONG CÁCH LIQUID GLASS === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            /* Nền động giống trang chủ */
+            background: linear-gradient(-45deg, #74ebd5, #ACB6E5, #ff9f43, #ff6b6b);
+            background-size: 400% 400%;
+            animation: bgmove 15s ease infinite;
+            color: #333;
+        }
+
+        @keyframes bgmove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* Khung hiển thị chính - Hiệu ứng kính mờ */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .icon-header {
+            font-size: 65px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        h2 {
+            color: #0d6efd;
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h3 {
+            color: #0d6efd;
+            font-size: 1.5em;
+            margin: 30px 0 15px 0;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+            text-align: left;
+        }
+
+        /* Khối chứa văn bản gọn gàng */
+        .content-box {
+            text-align: justify;
+            font-size: 1.15em;
+            line-height: 1.8;
+            color: #222;
+        }
+
+        .content-box p {
+            background: rgba(255, 255, 255, 0.5); 
+            padding: 20px 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 6px solid #0d6efd; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* CSS tùy chỉnh cho khối Thông tin tác giả */
+        .content-box .author-info {
+            border-left: 6px solid #ff9f43; /* Viền màu cam để phân biệt */
+            background: rgba(255, 255, 255, 0.65);
+            text-align: left;
+        }
+
+        .author-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 15px;
+        }
+
+        .author-list li {
+            margin-bottom: 12px;
+            font-size: 1.05em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .thanks-note {
+            font-style: italic;
+            color: #444;
+            border-top: 1px dashed #ccc;
+            padding-top: 15px;
+            margin-top: 10px;
+            font-size: 0.95em;
+        }
+
+        /* Nút quay lại */
+        .btn-home {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background: #ff4757;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .btn-home:hover {
+            transform: translateY(-3px) scale(1.05);
+            background: #ff2a3d;
+            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.5);
+        }
+
+        /* Thiết kế cho màn hình nhỏ (điện thoại) */
+        @media (max-width: 600px) {
+            .glass-panel { padding: 25px 15px; }
+            h2 { font-size: 1.8em; }
+            h3 { font-size: 1.3em; }
+            .content-box { font-size: 1em; }
+            .content-box p { padding: 15px; }
+            .author-list li { align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+	
+    <div class="container">
+        <div class="glass-panel">
+            <div class="icon-header">📘</div>
+            <h2>Giới thiệu dự án</h2>
+            
+            <div class="content-box">
+                <p>
+                    Ở lứa tuổi trung học cơ sở (THCS), nhiều yếu tố như căng thẳng học tập, thiếu ngủ, xung đột bạn bè hoặc thay đổi nội tiết có thể làm xuất hiện các biểu hiện khó chịu về cảm xúc và suy giảm tạm thời một số chức năng nhận thức (chú ý, trí nhớ, kiểm soát hành vi). Một tỷ lệ rất nhỏ học sinh có thể gặp các “trải nghiệm tâm lý bất thường ở mức sớm” (ví dụ: cảm giác bị quan sát, nghe thấy tiếng gọi thoáng qua, nghi ngờ quá mức) và nếu các trải nghiệm này lặp lại, tăng dần hoặc đi kèm suy giảm học tập thì cần được theo dõi và tư vấn chuyên môn.
+                </p>
+                <p>
+                    Đề tài xây dựng bộ 05 trò chơi nhận thức (Memory, Go/No-Go, N-back, Trail Making, Flexibility) phù hợp học sinh THCS nhằm thu thập tự động các chỉ số định lượng (thời gian phản ứng, số lỗi, tỷ lệ bỏ sót/nhấn nhầm…), từ đó tính chỉ số nguy cơ tổng hợp để phân loại 3 mức theo dõi trong nhà trường. Công cụ hướng tới hỗ trợ phòng tư vấn học đường phát hiện sớm nhóm học sinh cần quan tâm, và luôn nhấn mạnh: đây là công cụ sàng lọc hỗ trợ, không phải chẩn đoán; mọi trường hợp mức cao cần được trao đổi với phụ huynh và tham vấn với chuyên gia chuyên khoa khi cần.
+                </p>
+
+                <h3>👨‍💻 Thông tin nhóm phát triển</h3>
+                <div class="author-info" style="padding: 20px 25px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);">
+                    <ul class="author-list">
+                        <li>🎓 <strong>Nguyễn Phát</strong> - Lớp 8/7, Trường THCS Phan Đình Phùng - Đà Nẵng</li>
+                        <li>🎓 <strong>Nguyễn Ngọc Trâm Anh</strong> - Lớp 9/8, Trường THCS & THPT Nguyễn Khuyến - Đà Nẵng</li>
+                    </ul>
+                    <div class="thanks-note">
+                        💖 <em>Dự án được hoàn thiện với sự đồng hành và hỗ trợ tận tình của các thầy cô giáo trong suốt quá trình làm sản phẩm.</em>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="trangchu.html" class="btn-home">🏠 Về Trang Chủ</a>  
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bộ Trò Chơi Sàng Lọc Nhận Thức</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+body{ min-height:100vh; padding:20px; background:linear-gradient(-45deg,#74ebd5,#ACB6E5,#ff9f43,#ff6b6b); background-size:400% 400%; animation:bgmove 15s ease infinite; display: flex; flex-direction: column; }
+@keyframes bgmove{ 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+.container{ max-width:1200px; margin:auto; width: 100%; flex: 1; }
+.header{ background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.4); border-radius:20px; padding:20px; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15); margin-bottom:30px; }
+.profile{ display:flex; align-items:center; }
+.avatar{ width:80px; height:80px; border-radius:50%; background:#0d6efd; color:white; display:flex; justify-content:center; align-items:center; font-size:40px; margin-right:15px; box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3); }
+.profile h2{ color:#0d6efd; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); }
+.profile p{ color:#333; font-weight: 500; margin-top:4px; }
+.logout{ border:none; background:#ff4757; color:white; padding:12px 20px; border-radius:10px; cursor:pointer; transition:.3s; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); }
+.logout:hover{ transform:scale(1.05); background:#ff2a3d; }
+.title{ text-align:center; color:white; margin-bottom:25px; text-shadow:0 0 15px rgba(255,255,255,.8); }
+.game-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:25px; }
+.game-card{ background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius:20px; padding:25px; text-align:center; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1); transition: all 0.4s ease; }
+.game-card:hover{ transform: translateY(-10px) scale(1.02); background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: 0 15px 40px 0 rgba(0, 0, 0, 0.15); }
+.icon{ font-size:55px; margin-bottom:15px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+.game-card h3{ color:#0d6efd; margin-bottom:15px; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); }
+.game-card p{ color:#222; font-weight: 500; line-height:1.7; min-height:90px; }
+.btn{ display:block; margin-top:15px; padding:12px; text-decoration:none; border-radius:10px; background:#b8dd3f; color:#ff4d6d; font-weight:bold; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s; }
+.btn:hover{ background: #a8cf32; transform: scale(1.03); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+footer { text-align: center; padding: 20px 0 10px 0; color: rgba(51, 51, 51, 0.8); font-size: 14px; font-weight: 500; text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5); }
+
+/* THANH LIÊN HỆ BÊN PHẢI */
+.floating-contact { position: fixed; right: 20px; bottom: 40px; display: flex; flex-direction: column; gap: 20px; z-index: 1000; }
+.contact-item { position: relative; display: flex; align-items: center; justify-content: flex-end; cursor: pointer; }
+.contact-item a { text-decoration: none; display: flex; align-items: center; justify-content: flex-end; }
+.icon-wrapper { width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 28px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: all 0.3s ease; position: relative; z-index: 2; border: 2px solid white; }
+.contact-item.zalo .icon-wrapper { background-color: #0068ff; font-size: 18px; font-weight: bold; animation: pulse-zalo 2s infinite; }
+.contact-item.gmail .icon-wrapper { background-color: #ea4335; animation: pulse-gmail 2s infinite; }
+@keyframes pulse-zalo { 0% { box-shadow: 0 0 0 0 rgba(0, 104, 255, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(0, 104, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 104, 255, 0); } }
+@keyframes pulse-gmail { 0% { box-shadow: 0 0 0 0 rgba(234, 67, 53, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(234, 67, 53, 0); } 100% { box-shadow: 0 0 0 0 rgba(234, 67, 53, 0); } }
+.contact-info { position: absolute; right: 50px; background: white; color: white; padding: 10px 25px 10px 15px; border-radius: 25px 0 0 25px; font-weight: bold; font-size: 16px; opacity: 0; visibility: hidden; transform: translateX(20px); transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 1; }
+.contact-item.zalo .contact-info { background-color: #0068ff; }
+.contact-item.gmail .contact-info { background-color: #ea4335; }
+.contact-item:hover .icon-wrapper, .contact-item:active .icon-wrapper { transform: scale(1.1); }
+.contact-item:hover .contact-info, .contact-item:active .contact-info { opacity: 1; visibility: visible; transform: translateX(0); right: 70px; }
+
+/* THANH BÊN TRÁI (PHẢN HỒI) */
+.floating-left { position: fixed; left: 20px; bottom: 40px; display: flex; flex-direction: column; gap: 20px; z-index: 1000; }
+.left-item { position: relative; display: flex; align-items: center; justify-content: flex-start; cursor: pointer; }
+.left-item.feedback .icon-wrapper { background-color: #17a2b8; animation: pulse-feedback 2s infinite;}
+.left-item.rating .icon-wrapper { background-color: #ffc107; color: #fff; animation: pulse-rating 2s infinite; animation-delay: 1s;}
+@keyframes pulse-feedback { 0% { box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(23, 162, 184, 0); } 100% { box-shadow: 0 0 0 0 rgba(23, 162, 184, 0); } }
+@keyframes pulse-rating { 0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 193, 7, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); } }
+.left-info { position: absolute; left: 50px; color: white; padding: 10px 15px 10px 25px; border-radius: 0 25px 25px 0; font-weight: bold; font-size: 16px; opacity: 0; visibility: hidden; transform: translateX(-20px); transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 1; }
+.left-item.feedback .left-info { background-color: #17a2b8; }
+.left-item.rating .left-info { background-color: #ffc107; color: #333;}
+.left-item:hover .icon-wrapper, .left-item:active .icon-wrapper { transform: scale(1.1); }
+.left-item:hover .left-info, .left-item:active .left-info { opacity: 1; visibility: visible; transform: translateX(0); left: 70px; }
+
+/* MODAL FORMS */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease; }
+.modal-content { background: white; width: 90%; max-width: 500px; border-radius: 20px; padding: 30px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); transform: translateY(-50px); transition: transform 0.3s ease; position: relative; }
+.modal-overlay.active { display: flex; opacity: 1; }
+.modal-overlay.active .modal-content { transform: translateY(0); }
+.modal-close { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #888; transition: 0.3s; }
+.modal-close:hover { color: #ff4757; }
+.modal-title { color: #0d6efd; margin-bottom: 20px; text-align: center; font-size: 24px; }
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
+.form-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 10px; resize: none; height: 80px; outline: none; transition: border-color 0.3s; }
+.form-group textarea:focus { border-color: #0d6efd; }
+.btn-submit { width: 100%; padding: 12px; border: none; border-radius: 10px; background: #0d6efd; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+.btn-submit:hover { background: #0b5ed7; transform: translateY(-2px); }
+.stars { display: flex; justify-content: center; gap: 10px; font-size: 35px; color: #ccc; cursor: pointer; margin-bottom: 20px; }
+.stars i { transition: 0.2s; }
+.stars i:hover, .stars i.active { color: #ffc107; transform: scale(1.2); }
+.btn-submit:disabled { background: #a5c8ff; cursor: not-allowed; }
+@media (max-width: 900px) { .game-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .game-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1 class="title">🎮 BỘ TRÒ CHƠI SÀNG LỌC NHẬN THỨC 🧠</h1>
+
+<div class="header">
+    <div class="profile">
+        <div class="avatar">👤</div>
+        <div>
+            <h2 id="name"></h2>
+            <p id="class"></p>
+            <p id="gender"></p>
+        </div>
+    </div>
+    <button class="logout" onclick="logout()">🚪 Đăng xuất</button>
+</div>
+
+<div class="game-grid">
+    <div class="game-card"> <div class="icon">🧠</div> <h3>Memory Matching</h3> <p>Kiểm tra trí nhớ ngắn hạn. Lật và ghép các cặp hình giống nhau.</p> <a href="sanglocnhanthuc(1).html" class="btn">Bắt đầu</a> </div>
+    <div class="game-card"> <div class="icon">✋</div> <h3>Stop the Game</h3> <p>Kiểm tra khả năng ức chế và phản xạ với các tín hiệu.</p> <a href="kiemtraucche(2).html" class="btn">Bắt đầu</a> </div>
+    <div class="game-card"> <div class="icon">🔄</div> <h3>N-Back Task</h3> <p>Kiểm tra trí nhớ làm việc bằng cách ghi nhớ vị trí trước đó.</p> <a href="kiemtrratrinholamviec(3).html" class="btn">Bắt đầu</a> </div>
+    <div class="game-card"> <div class="icon">✏️</div> <h3>Trail Making Test</h3> <p>Nối các mục tiêu theo đúng thứ tự nhanh nhất có thể.</p> <a href="kiemtratocdo.html" class="btn">Bắt đầu</a> </div>
+    <div class="game-card"> <div class="icon">🔀</div> <h3>Flexibility Test</h3> <p>Đánh giá sự linh hoạt trong tư duy và thích ứng.</p> <a href="kiemtrralinhhoat(5).html" class="btn">Bắt đầu</a> </div>
+    <div class="game-card"> <div class="icon">📘</div> <h3>Giới thiệu</h3> <p>Thông tin chung về dự án và bộ công cụ đánh giá.</p> <a href="gioithieu.html" class="btn">Chi tiết</a> </div>
+</div>
+</div>
+
+<footer>© 2026 - Dự án Nghiên cứu Sàng lọc sớm nguy cơ rối loạn tâm lý dành cho học sinh THCS</footer>
+
+<div class="floating-left">
+    <div class="left-item feedback" onclick="openModal('feedbackModal')">
+        <div class="icon-wrapper"><i class="fa-solid fa-comment-dots"></i></div> <span class="left-info">Phản hồi</span>
+    </div>
+    <div class="left-item rating" onclick="openModal('ratingModal')">
+        <div class="icon-wrapper"><i class="fa-solid fa-star"></i></div> <span class="left-info">Đánh giá trải nghiệm</span>
+    </div>
+</div>
+
+<div class="floating-contact">
+    <div class="contact-item zalo">
+        <a href="https://zalo.me/0762523437" target="_blank"> <span class="contact-info">0762 523 437</span> <div class="icon-wrapper">Zalo</div> </a>
+    </div>
+    <div class="contact-item gmail">
+        <a href="mailto:4846829467danangitrithucvn@gmail.com" target="_blank"> <span class="contact-info">4846829467danangitrithucvn@gmail.com</span> <div class="icon-wrapper"><i class="fa-solid fa-envelope"></i></div> </a>
+    </div>
+</div>
+
+<div class="modal-overlay" id="feedbackModal">
+    <div class="modal-content">
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('feedbackModal')"></i>
+        <h3 class="modal-title">Gửi Phản Hồi</h3>
+        <div class="form-group"> <label>Ý kiến của bạn về sản phẩm</label> <textarea id="fb-general" placeholder="Nhập ý kiến của bạn..."></textarea> </div>
+        <div class="form-group"> <label>Ưu điểm</label> <textarea id="fb-pros" placeholder="Những điểm bạn thấy tốt..."></textarea> </div>
+        <div class="form-group"> <label>Nhược điểm</label> <textarea id="fb-cons" placeholder="Những điểm cần cải thiện..."></textarea> </div>
+        <button class="btn-submit" id="btn-submit-fb" onclick="submitFeedback()">Gửi phản hồi</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="ratingModal">
+    <div class="modal-content">
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('ratingModal')"></i>
+        <h3 class="modal-title">Đánh Giá Trải Nghiệm</h3>
+        <div class="stars" id="starContainer">
+            <i class="fa-solid fa-star" data-value="1"></i> <i class="fa-solid fa-star" data-value="2"></i> <i class="fa-solid fa-star" data-value="3"></i> <i class="fa-solid fa-star" data-value="4"></i> <i class="fa-solid fa-star" data-value="5"></i>
+        </div>
+        <div class="form-group"> <label>Chi tiết trải nghiệm của bạn</label> <textarea id="rating-text" placeholder="Hãy chia sẻ trải nghiệm của bạn..."></textarea> </div>
+        <button class="btn-submit" id="btn-submit-rating" onclick="submitRating()">Gửi đánh giá</button>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// TÍCH HỢP ĐĂNG NHẬP (TRÍCH XUẤT TÊN VÀ TRƯỜNG/LỚP)
+// ==========================================
+let savedUser = localStorage.getItem("user");
+let senderName = "Khách (Chưa đăng nhập)";
+let senderClass = "Không có thông tin";
+
+if(savedUser) {
+    let user = JSON.parse(savedUser);
+    document.getElementById("name").innerText = "Xin chào " + (user.name || "bạn");
+    document.getElementById("class").innerText = "🏫 Lớp: " + (user.class || "N/A");
+    document.getElementById("gender").innerText = "🚻 Giới tính: " + (user.gender || "N/A");
+    
+    // Tách riêng rẽ thông tin tên và lớp để gửi về Google Sheets làm 2 cột
+    senderName = user.name ? user.name : "Người dùng ẩn danh";
+    senderClass = user.class ? user.class : "Không có thông tin";
+}
+
+function logout(){
+    localStorage.removeItem("user");
+    window.location.href="login.html";
+}
+
+// Logic Mở/Đóng Modal và Sao
+function openModal(id) { document.getElementById(id).classList.add("active"); }
+function closeModal(id) { document.getElementById(id).classList.remove("active"); }
+
+let selectedRating = 0;
+const stars = document.querySelectorAll('#starContainer i');
+stars.forEach(star => {
+    star.addEventListener('click', function() {
+        selectedRating = this.getAttribute('data-value');
+        updateStars(selectedRating);
+    });
+});
+
+function updateStars(rating) {
+    stars.forEach(star => {
+        if (star.getAttribute('data-value') <= rating) { star.classList.add('active'); } 
+        else { star.classList.remove('active'); }
+    });
+}
+
+// ==========================================
+// TÍCH HỢP GOOGLE SHEETS
+// ==========================================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtrMg-16HQ8i1M3rQExrM-WmeKYjfSqQ9rxsGV9RzGl-RaLaE72nsqbNJ6OG8rgVAtxQ/exec"; 
+
+// Xử lý Gửi Phản hồi
+function submitFeedback() {
+    let general = document.getElementById("fb-general").value;
+    let pros = document.getElementById("fb-pros").value;
+    let cons = document.getElementById("fb-cons").value;
+
+    if(!general && !pros && !cons) {
+        alert("Vui lòng nhập ít nhất một thông tin phản hồi!");
+        return;
+    }
+
+    let btn = document.getElementById("btn-submit-fb");
+    btn.disabled = true;
+    btn.innerText = "Đang gửi...";
+
+    // Gửi thông tin riêng biệt: name và schoolClass
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            name: senderName,         // Gửi Tên vào cột 2
+            schoolClass: senderClass, // Gửi Lớp/Trường vào cột 3
+            type: "Phản hồi ý kiến",
+            content1: "Ý kiến: " + general,
+            content2: "Ưu điểm: " + pros,
+            content3: "Nhược điểm: " + cons
+        })
+    }).then(() => {
+        alert("Cảm ơn bạn vì đã cho chúng tôi nhận xét, chúng tôi sẽ cố gắng phát triển thêm.");
+        btn.disabled = false;
+        btn.innerText = "Gửi phản hồi";
+        document.getElementById("fb-general").value = "";
+        document.getElementById("fb-pros").value = "";
+        document.getElementById("fb-cons").value = "";
+        closeModal('feedbackModal');
+    }).catch(err => {
+        alert("Có lỗi xảy ra, vui lòng thử lại!");
+        btn.disabled = false;
+        btn.innerText = "Gửi phản hồi";
+    });
+}
+
+// Xử lý Gửi Đánh giá sao
+function submitRating() {
+    let text = document.getElementById("rating-text").value;
+
+    if(selectedRating === 0) {
+        alert("Vui lòng chọn số sao để đánh giá!");
+        return;
+    }
+
+    let btn = document.getElementById("btn-submit-rating");
+    btn.disabled = true;
+    btn.innerText = "Đang gửi...";
+
+    // Gửi thông tin riêng biệt: name và schoolClass
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            name: senderName,         // Gửi Tên vào cột 2
+            schoolClass: senderClass, // Gửi Lớp/Trường vào cột 3
+            type: "Đánh giá trải nghiệm",
+            content1: selectedRating + " Sao",
+            content2: "Chi tiết: " + text,
+            content3: ""
+        })
+    }).then(() => {
+        alert("Cảm ơn bạn đã đánh giá " + selectedRating + " sao cho sản phẩm!");
+        btn.disabled = false;
+        btn.innerText = "Gửi đánh giá";
+        selectedRating = 0;
+        updateStars(0);
+        document.getElementById("rating-text").value = "";
+        closeModal('ratingModal');
+    }).catch(err => {
+        alert("Có lỗi xảy ra, vui lòng thử lại!");
+        btn.disabled = false;
+        btn.innerText = "Gửi đánh giá";
+    });
+}
+</script>
+</body>
+</html>
