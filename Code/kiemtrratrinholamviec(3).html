@@ -21,22 +21,12 @@
         .screen.active { display: block; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* --- HIỆU ỨNG RUNG KHI SAI --- */
-        @keyframes shakeError {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-15px) rotate(-3deg); }
-            40%, 80% { transform: translateX(15px) rotate(3deg); }
-        }
-        .shake-error {
-            animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both;
-            border-color: #ff4757 !important;
-            box-shadow: 0 0 25px rgba(255, 71, 87, 0.7) !important;
-        }
+        @keyframes shakeError { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-15px) rotate(-3deg); } 40%, 80% { transform: translateX(15px) rotate(3deg); } }
+        .shake-error { animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both; border-color: #ff4757 !important; box-shadow: 0 0 25px rgba(255, 71, 87, 0.7) !important; }
 
         h2 { color: #0d6efd; margin-bottom: 20px; font-size: 2em; }
         .btn { padding: 12px 20px; font-size: 16px; font-weight: bold; color: white; background-color: #0d6efd; border: none; border-radius: 10px; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .btn:hover:not(:disabled) { transform: scale(1.05); background-color: #0b5ed7; box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4); }
-        .btn:disabled { background-color: #bdc3c7; cursor: not-allowed; box-shadow: none; transform: none; }
         .btn-secondary { background-color: #ff4757; color: white; }
         .btn-secondary:hover:not(:disabled) { background-color: #ff2a3d; box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4); }
         .btn-level { width: 350px; margin: 10px; padding: 15px; font-size: 16px; background-color: #43e97b; color: #fff; }
@@ -48,7 +38,6 @@
         .char-item { font-size: 50px; padding: 15px; background: #fff; border-radius: 15px; border: 2px solid #ddd; cursor: pointer; transition: 0.2s; text-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .char-item:hover { transform: scale(1.15) translateY(-5px); border-color: #0d6efd; }
         
-        /* --- KHU VỰC HIỂN THỊ KÝ TỰ & LƯỢT CHƠI --- */
         #stimulusWrapper { position: relative; margin: 40px auto 30px auto; width: 180px; }
         .turn-badge { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); background: #ff9f43; color: white; font-weight: bold; padding: 5px 20px; border-radius: 20px; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 2; white-space: nowrap; }
         #stimulusBox { font-size: 90px; width: 180px; height: 180px; background: #f1f2f6; display: flex; justify-content: center; align-items: center; border-radius: 20px; border: 3px solid #ddd; box-shadow: 0 8px 20px rgba(0,0,0,0.05); transition: transform 0.1s; }
@@ -58,9 +47,58 @@
         .modal-content { background-color: #fff; padding: 35px; border-radius: 20px; width: 90%; max-width: 600px; text-align: center; position: relative; }
         #historyContent { max-height: 250px; overflow-y: auto; text-align: left; margin-top: 15px; }
         .history-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+
+        /* --- CSS ĐIỀU KHIỂN NHẠC --- */
+        .music-controls { position: fixed; top: 20px; left: 20px; display: flex; align-items: center; gap: 10px; z-index: 1000; }
+        .music-select { padding: 10px 12px; border-radius: 20px; border: 2px solid #0d6efd; background-color: rgba(255, 255, 255, 0.85); color: #333; font-weight: bold; outline: none; box-shadow: 0 4px 15px rgba(0,0,0,0.15); backdrop-filter: blur(5px); cursor: pointer; font-size: 14px; transition: all 0.3s; }
+        .music-select:focus, .music-select:hover { border-color: #0b5ed7; }
+        
+        /* Cập nhật class music-btn thành hình tròn cho icon */
+        .music-btn { 
+            width: 42px; 
+            height: 42px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background-color: rgba(255, 255, 255, 0.85); 
+            color: #333; 
+            border: 2px solid #0d6efd; 
+            border-radius: 50%; 
+            font-size: 18px; 
+            cursor: pointer; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+            transition: all 0.3s ease; 
+            backdrop-filter: blur(5px); 
+            padding: 0;
+        }
+        .music-btn:hover { background-color: #0d6efd; color: white; transform: scale(1.05); }
+        .music-btn.playing { background-color: #2ecc71; border-color: #27ae60; color: white; animation: pulseMusic 2s infinite; }
+        @keyframes pulseMusic { 0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); } 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); } }
+        @media (max-width: 700px) { 
+            .music-controls { top: 10px; left: 10px; flex-direction: column; align-items: flex-start; gap: 8px; } 
+            .music-btn { width: 36px; height: 36px; font-size: 16px; } 
+            .music-select { padding: 8px 10px; font-size: 13px; max-width: 180px; } 
+        }
     </style>
 </head>
 <body>
+
+    <audio id="bgMusic" loop>
+        <source src="noinaycoanh.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="music-controls">
+        <select id="musicSelect" class="music-select">
+            <option value="noinaycoanh.mp3">Nơi Này Có Anh</option>
+            <option value="wedonttalkanymore.mp3">We Don't Talk Anymore</option>
+            <option value="shapeofyou.mp3">Shape Of You</option>
+            <option value="beautyandabeat.mp3">Beauty And A Beat</option>
+            <option value="comemyway.mp3">Come My Way</option>
+            <option value="phonk.mp3">Viral Phonk-Funk 2026</option>
+        </select>
+        <button id="musicToggleBtn" class="music-btn" title="Bật/Tắt nhạc">🔇</button>
+    </div>
+
     <div class="container">
         <h1 style="color:white; margin-bottom:20px; text-shadow:0 0 10px rgba(0,0,0,0.1);">🔄 KIỂM TRA TRÍ NHỚ LÀM VIỆC (N-BACK)</h1>
         <div class="screen-box">
@@ -100,7 +138,8 @@
                 </div>
                 
                 <button class="btn" id="matchBtn" style="font-size:20px; padding:15px 40px; background:#2ecc71; width:80%;">TRÙNG KHỚP (Space)</button>
-                <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
+                <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                    <button class="btn" id="pauseBtn" style="background:#f39c12;">⏸️ Tạm ngưng (P)</button>
                     <button class="btn" id="quitGameBtn" style="background:#7f8c8d;">Thử mức khác</button>
                     <a href="trangchu.html" class="btn btn-secondary">🏠 Về Trang Chủ</a>
                 </div>
@@ -135,6 +174,43 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwCcMzIe1zk1_6ZJXpp4IOt6ihxp_kWbc-S2ywvIuBYmuXL54bZTQhJ1h385ijfRR7Pqw/exec"; 
 
         document.addEventListener('DOMContentLoaded', () => {
+
+            const bgMusic = document.getElementById('bgMusic');
+            const musicToggleBtn = document.getElementById('musicToggleBtn');
+            const musicSelect = document.getElementById('musicSelect');
+            let isMusicPlaying = false;
+            
+            bgMusic.volume = 0.3; 
+
+            function playMusic() {
+                bgMusic.play().then(() => {
+                    // Cập nhật lại JS: chỉ set icon khi đang phát nhạc
+                    musicToggleBtn.innerHTML = '🎵';
+                    musicToggleBtn.classList.add('playing');
+                    isMusicPlaying = true;
+                }).catch(err => {
+                    console.log("Không thể phát nhạc:", err);
+                    alert("Trình duyệt chặn phát nhạc tự động, vui lòng kiểm tra lại.");
+                });
+            }
+
+            musicSelect.addEventListener('change', (e) => {
+                bgMusic.src = e.target.value;
+                if (isMusicPlaying) playMusic();
+            });
+
+            musicToggleBtn.addEventListener('click', () => {
+                if (isMusicPlaying) {
+                    bgMusic.pause();
+                    // Cập nhật lại JS: chỉ set icon tắt âm thanh
+                    musicToggleBtn.innerHTML = '🔇';
+                    musicToggleBtn.classList.remove('playing');
+                    isMusicPlaying = false;
+                } else {
+                    playMusic();
+                }
+            });
+
             const playApplauseSound = () => {
                 try {
                     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -152,12 +228,9 @@
                     const ctx = new (window.AudioContext || window.webkitAudioContext)();
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
-                    osc.type = type;
-                    osc.frequency.value = freq;
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start();
-                    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + duration);
+                    osc.type = type; osc.frequency.value = freq;
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(); gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + duration);
                     setTimeout(() => { osc.stop(); ctx.close(); }, duration * 1000);
                 } catch(e){}
             };
@@ -167,13 +240,9 @@
                     const ctx = new (window.AudioContext || window.webkitAudioContext)();
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(1200, ctx.currentTime);
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.start();
-                    gain.gain.setValueAtTime(0.5, ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.4);
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(1200, ctx.currentTime);
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(); gain.gain.setValueAtTime(0.5, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.4);
                     setTimeout(() => { osc.stop(); ctx.close(); }, 400);
                 } catch(e){}
             };
@@ -181,7 +250,7 @@
             const characterSets = [ ['🚗','🚀','✈️','🚢','🚲'], ['🦁','🐯','🐵','🐘','🐼'], ['🍎','🍌','🍇','🍉','🍓'] ];
             let selectedSet = [], N = 1, timerInterval = null, gameLoopInterval = null, timeRemaining = 240;
             let sequence = [], currentStep = 0, totalSteps = 25, hits = 0, falseAlarms = 0, missed = 0, userResponded = false;
-            let isPlaying = false;
+            let isPlaying = false, isPaused = false;
             
             let savedUser = localStorage.getItem("user");
             let userInfo = { name: "Người chơi ẩn danh", class: "Không xác định", school: "" };
@@ -197,6 +266,7 @@
             const stimulusBox = document.getElementById('stimulusBox');
             const turnBadge = document.getElementById('turnBadge');
             const matchBtn = document.getElementById('matchBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
 
             function initChars() {
                 const grid = document.getElementById('characterGrid'); grid.innerHTML = '';
@@ -207,7 +277,6 @@
                 });
             }
 
-            // CHỨC NĂNG QUAY LẠI
             document.getElementById('backToCharBtn').addEventListener('click', () => {
                 screens.level.classList.remove('active');
                 screens.char.classList.add('active');
@@ -229,6 +298,9 @@
                 turnBadge.textContent = "Chuẩn bị...";
                 matchBtn.disabled = true;
                 isPlaying = false;
+                isPaused = false;
+                pauseBtn.innerHTML = '⏸️ Tạm ngưng (P)';
+                pauseBtn.style.background = '#f39c12';
                 stimulusBox.style.fontSize = '120px';
 
                 const countdownInterval = setInterval(() => {
@@ -262,10 +334,7 @@
                 }
 
                 updateStats();
-                
-                startCountdown(() => {
-                    startTimers();
-                });
+                startCountdown(() => { startTimers(); });
             }
 
             function startTimers() {
@@ -285,10 +354,7 @@
                 if (currentStep >= totalSteps) { endGame(false, false); return; }
                 userResponded = false;
                 stimulusBox.textContent = sequence[currentStep];
-                
-                // HIỂN THỊ LƯỢT CHƠI (Tăng currentStep thêm 1 để hiển thị thân thiện với người dùng: Lượt 1, 2...)
                 turnBadge.textContent = `Lượt thứ: ${currentStep + 1} / ${totalSteps}`;
-                
                 currentStep++;
                 updateStats();
 
@@ -299,27 +365,66 @@
                 }, 2500); 
             }
 
+            function togglePause() {
+                if (!isPlaying) return; 
+                isPaused = !isPaused;
+                
+                if (isPaused) {
+                    pauseBtn.innerHTML = '▶️ Tiếp tục (P)';
+                    pauseBtn.style.background = '#e67e22';
+                    clearInterval(timerInterval);
+                    clearTimeout(gameLoopInterval);
+                    stimulusBox.textContent = "⏸️"; 
+                    matchBtn.disabled = true;
+                } else {
+                    pauseBtn.innerHTML = '⏸️ Tạm ngưng (P)';
+                    pauseBtn.style.background = '#f39c12';
+                    matchBtn.disabled = false;
+                    stimulusBox.textContent = sequence[currentStep - 1]; 
+                    
+                    // Khởi động lại bộ đếm thời gian
+                    timerInterval = setInterval(() => {
+                        timeRemaining--;
+                        let m = Math.floor(timeRemaining / 60), s = timeRemaining % 60;
+                        document.getElementById('gameTimer').textContent = `⏱️ Thời gian: ${m}:${s < 10 ? '0' : ''}${s}`;
+                        if (timeRemaining <= 30) document.getElementById('gameTimer').classList.add('time-warning');
+                        if (timeRemaining <= 0) { alert("⏰ Hết giờ!"); endGame(false, true); }
+                    }, 1000);
+                    
+                    // Chạy tiếp vòng lặp ký tự
+                    gameLoopInterval = setTimeout(() => {
+                        if (!userResponded && currentStep > N && sequence[currentStep - 1] === sequence[currentStep - 1 - N]) { missed++; }
+                        runGameLoop();
+                    }, 2500);
+                }
+            }
+
             function handleMatchClick() {
-                if(!isPlaying || userResponded) return; 
+                if(!isPlaying || userResponded || isPaused) return; 
                 userResponded = true;
                 
                 if (currentStep > N && sequence[currentStep - 1] === sequence[currentStep - 1 - N]) { 
                     hits++; 
-                    playTing(); // TING KHI ĐÚNG
+                    playTing(); 
                 }
                 else { 
                     falseAlarms++; 
-                    triggerError(); // RUNG VÀ KÊU KHI SAI
+                    triggerError(); 
                 }
                 updateStats();
             }
             
+            pauseBtn.addEventListener('click', togglePause);
             document.getElementById('matchBtn').addEventListener('click', handleMatchClick);
+            
             document.addEventListener('keydown', (e) => { 
                 if(e.code === 'Space' && screens.game.classList.contains('active')) { 
                     e.preventDefault(); 
-                    if (!matchBtn.disabled) handleMatchClick(); 
+                    if (!matchBtn.disabled && !isPaused) handleMatchClick(); 
                 } 
+                if((e.code === 'KeyP') && screens.game.classList.contains('active')) {
+                    togglePause();
+                }
             });
 
             function updateStats() {
@@ -335,23 +440,18 @@
                 let acc = totalCorrectPossible > 0 ? ((hits / totalCorrectPossible) * 100).toFixed(0) : 0;
                 
                 fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        action: "save_score",
-                        name: userInfo.name,                         
-                        schoolClass: schoolClassInfo,                 
-                        gameName: `N-Back (${resultObj.n}-Back)`, 
-                        score: `Đúng: ${resultObj.hits} | Lỗi nhầm: ${resultObj.falseAlarms}`,    
-                        timePlayed: elapsed + " giây",         
-                        accuracy: `${acc}% (Nguy cơ: ${resultObj.risk})` 
+                        action: "save_score", name: userInfo.name, schoolClass: schoolClassInfo,                 
+                        gameName: `N-Back (${resultObj.n}-Back)`, score: `Đúng: ${resultObj.hits} | Lỗi nhầm: ${resultObj.falseAlarms}`,    
+                        timePlayed: elapsed + " giây", accuracy: `${acc}% (Nguy cơ: ${resultObj.risk})` 
                     })
                 }).then(() => {}).catch(err => console.log("Lỗi gửi điểm:", err));
             }
 
             function endGame(isQuit=false, isTimeout=false) {
                 isPlaying = false;
+                isPaused = false;
                 clearInterval(timerInterval); clearTimeout(gameLoopInterval);
                 if (isQuit) return;
 
