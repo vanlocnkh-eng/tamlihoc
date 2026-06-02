@@ -273,7 +273,11 @@
                 sequence = generateSequence(level);
                 nextTargetBox.innerHTML = `Hãy tìm điểm đầu tiên: <span style="color:#ff4757; font-size:1.4em;">${sequence[0]}</span>`;
                 
-                tmtArea.innerHTML = '<svg id="tmtLines"></svg><div id="overlayBox"></div>'; // Reset area
+                // --- ĐÂY LÀ CHỖ ĐÃ FIX LỖI ---
+                // Xóa các điểm chơi cũ (tmt-node) mà không xóa svg và overlayBox
+                document.querySelectorAll('.tmt-node').forEach(node => node.remove());
+                svgLines.innerHTML = ''; // Làm sạch các đường vẽ cũ
+                
                 generateNodes();
                 
                 screens.level.classList.remove('active'); screens.game.classList.add('active');
@@ -284,14 +288,13 @@
             }
 
             function generateNodes() {
-                // Tạo khoảng cách xa hơn một chút nếu là mức C, D để tránh đè chéo nhiều
                 const minDistance = (currentLevel === 'C' || currentLevel === 'D') ? 11 : 14; 
                 
                 sequence.forEach((val, index) => {
                     let x, y, overlap;
                     do {
                         overlap = false;
-                        x = 5 + Math.random() * 90; // Tạo ngẫu nhiên từ 5% đến 95%
+                        x = 5 + Math.random() * 90; 
                         y = 5 + Math.random() * 90;
                         for (let pos of nodePositions) {
                             let dist = Math.sqrt(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y, 2));
@@ -307,7 +310,6 @@
                     node.style.left = `${x}%`;
                     node.style.top = `${y}%`;
                     node.addEventListener('mousedown', () => handleNodeClick(val, node, index));
-                    // Hỗ trợ cảm ứng trên điện thoại
                     node.addEventListener('touchstart', (e) => { e.preventDefault(); handleNodeClick(val, node, index); });
                     
                     tmtArea.appendChild(node);
@@ -321,9 +323,8 @@
                 if (value === sequence[nextNodeIndex]) {
                     // Nếu bấm đúng
                     nodeElement.classList.add('correct');
-                    playTing(); // Phát âm thanh đúng
+                    playTing(); 
                     
-                    // Vẽ đường thẳng nếu không phải là điểm đầu tiên
                     if (nextNodeIndex > 0) {
                         drawLine(nodePositions[nextNodeIndex - 1], nodePositions[nextNodeIndex]);
                     }
@@ -343,7 +344,7 @@
                         errors++;
                         document.getElementById('gameErrors').textContent = `❌ Lỗi sai: ${errors}`;
                         
-                        playBeep(150, 'sawtooth', 0.3); // Phát âm thanh lỗi
+                        playBeep(150, 'sawtooth', 0.3); 
                         nodeElement.classList.add('shake-error');
                         
                         setTimeout(() => { 
@@ -353,18 +354,17 @@
                 }
             }
 
-            // Vẽ đường thẳng nối giữa 2 điểm (sử dụng tọa độ %)
+            // Vẽ đường thẳng nối giữa 2 điểm
             function drawLine(node1, node2) {
-                const svg = document.getElementById('tmtLines');
                 const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
                 line.setAttribute('x1', `${node1.x}%`);
                 line.setAttribute('y1', `${node1.y}%`);
                 line.setAttribute('x2', `${node2.x}%`);
                 line.setAttribute('y2', `${node2.y}%`);
-                line.setAttribute('stroke', 'rgba(13, 110, 253, 0.4)'); // Màu đường nối (xanh lam nhạt)
+                line.setAttribute('stroke', 'rgba(13, 110, 253, 0.4)'); 
                 line.setAttribute('stroke-width', '4');
                 line.setAttribute('stroke-linecap', 'round');
-                svg.appendChild(line);
+                svgLines.appendChild(line);
             }
 
             function startTimer() {
@@ -405,7 +405,6 @@
 
                 let risk = "Thấp", advice = "Tốc độ xử lý và khả năng chú ý phân chia của bạn rất ổn định.";
                 
-                // Điều chỉnh độ khó đánh giá tùy theo Level
                 let maxTime = (currentLevel === 'A' || currentLevel === 'B') ? 90 : 150;
                 let maxErrors = (currentLevel === 'A' || currentLevel === 'B') ? 2 : 4;
 
