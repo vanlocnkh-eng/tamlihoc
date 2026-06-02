@@ -21,7 +21,7 @@
         .screen.active { display: block; animation: fadeIn 0.5s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* --- HIỆU ỨNG RUNG MÀN HÌNH --- */
+        /* --- HIỆU ỨNG RUNG MÀN HÌNH KHI SAI --- */
         @keyframes shakeError {
             0%, 100% { transform: translateX(0); }
             20%, 60% { transform: translateX(-15px) rotate(-1deg); }
@@ -29,7 +29,7 @@
         }
         .shake-error {
             animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both;
-            box-shadow: 0 0 20px rgba(255, 71, 87, 0.6) !important; /* Đỏ viền khi rung */
+            box-shadow: 0 0 20px rgba(255, 71, 87, 0.6) !important; 
         }
         
         h2 { color: #8e44ad; margin-bottom: 20px; font-size: 1.8em; }
@@ -159,7 +159,7 @@
                 } catch(e){}
             };
 
-            // Hàm phát tiếng bíp đếm ngược hoặc âm báo lỗi
+            // Hàm phát tiếng bíp (đếm ngược, âm báo lỗi)
             const playBeep = (freq, type = 'sine', duration = 0.3) => {
                 try {
                     const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -172,6 +172,23 @@
                     osc.start();
                     gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + duration);
                     setTimeout(() => { osc.stop(); ctx.close(); }, duration * 1000);
+                } catch(e){}
+            };
+
+            // Hàm phát tiếng "ting" khi làm đúng
+            const playTing = () => {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1200, ctx.currentTime); // Tần số cao, âm thanh trong trẻo
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.4); // Ngắt âm nhanh
+                    setTimeout(() => { osc.stop(); ctx.close(); }, 400);
                 } catch(e){}
             };
 
@@ -193,7 +210,7 @@
             const modals = { result: document.getElementById('resultModal'), history: document.getElementById('historyModal') };
             const stimEl = document.getElementById('stimulus');
             const actionBtn = document.getElementById('actionBtn');
-            const mainScreenBox = document.getElementById('mainScreenBox'); // Lấy phần tử box để tạo hiệu ứng rung
+            const mainScreenBox = document.getElementById('mainScreenBox'); 
 
             window.setChars = (go, nogo) => { goChar = go; noGoChar = nogo; screens.char.classList.remove('active'); screens.level.classList.add('active'); };
 
@@ -201,19 +218,16 @@
                 if (e.target.matches('.btn-level')) { gameMode = e.target.getAttribute('data-mode'); startGame(); }
             });
 
-            // Hàm xử lý lỗi (rung màn hình + âm báo)
             function triggerError() {
                 errorCount++;
                 updateStats();
-                playBeep(150, 'sawtooth', 0.4); // Âm thanh lỗi trầm
+                playBeep(150, 'sawtooth', 0.4); 
                 
-                // Kích hoạt class rung
                 mainScreenBox.classList.remove('shake-error');
-                void mainScreenBox.offsetWidth; // Mẹo nhỏ ép trình duyệt reset animation
+                void mainScreenBox.offsetWidth; 
                 mainScreenBox.classList.add('shake-error');
             }
 
-            // Hàm đếm ngược 3, 2, 1
             function startCountdown(callback) {
                 let count = 3;
                 stimEl.style.transform = 'scale(1)';
@@ -283,14 +297,15 @@
                 stimTimeout = setTimeout(() => {
                     stimEl.style.transform = 'scale(0)';
                     
-                    // Nếu cần bấm mà bỏ lỡ -> Tính lỗi + Rung màn hình
+                    // Bỏ lỡ bấm lúc cần bấm
                     if (isGoTrial && !userResponded) { 
                         triggerError(); 
                     }
-                    // Nếu không cần bấm và không bấm -> Tính đúng
+                    // Nhịn bấm thành công
                     else if (!isGoTrial && !userResponded) { 
                         correctCount++; 
                         updateStats(); 
+                        playTing(); // Phản hồi tích cực
                     }
                     
                     nextStimTimeout = setTimeout(nextTrial, 1000);
@@ -304,10 +319,12 @@
                 stimEl.style.transform = 'scale(0)';
 
                 if (isGoTrial) { 
+                    // Bấm đúng
                     correctCount++; 
                     updateStats();
+                    playTing(); // Phản hồi tích cực
                 } else { 
-                    // Bấm sai lúc cần nhịn -> Tính lỗi + Rung màn hình
+                    // Bấm sai lúc cần nhịn
                     triggerError(); 
                 }
                 
