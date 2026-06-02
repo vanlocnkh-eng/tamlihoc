@@ -97,6 +97,7 @@
                     <button class="btn btn-level" data-mode="challenge" style="background:#e67e22;">Thách thức (Tỉ lệ dừng 40%)</button>
                 </div>
                 
+                <!-- NÚT QUAY LẠI CHỌN NHÂN VẬT -->
                 <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
                     <button class="btn" id="backToCharBtn" style="background:#7f8c8d;">🔙 Quay lại</button>
                     <a href="trangchu.html" class="btn btn-secondary">🏠 Về Trang Chủ</a>
@@ -118,6 +119,7 @@
                 
                 <button class="btn" id="actionBtn" style="font-size:22px; padding:15px 50px; width:80%;">BẤM NGAY! (Space)</button>
                 
+                <!-- NÚT TẠM NGỪNG -->
                 <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
                     <button class="btn" id="pauseGameBtn" style="background-color: #f39c12;">⏸ Tạm ngừng</button>
                     <button class="btn" id="quitGameBtn" style="background:#7f8c8d;">Thử lại mức khác</button>
@@ -181,6 +183,22 @@
                 } catch(e){}
             };
 
+            const playTing = () => {
+                try {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1200, ctx.currentTime);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.4);
+                    setTimeout(() => { osc.stop(); ctx.close(); }, 400);
+                } catch(e){}
+            };
+
             let goChar = '🚗', noGoChar = '🛑', gameMode = 'basic';
             let timerInterval = null, stimTimeout = null, nextStimTimeout = null, timeRemaining = 240;
             let currentTrial = 0, totalTrials = 30, correctCount = 0, errorCount = 0, isGoTrial = true, userResponded = false;
@@ -218,7 +236,7 @@
 
             // CHỨC NĂNG TẠM NGỪNG
             pauseGameBtn.addEventListener('click', () => {
-                if (!isPlaying && !isPaused) return; // Không cho dừng khi đang đếm ngược 3-2-1
+                if (!isPlaying && !isPaused) return; 
                 isPaused = !isPaused;
 
                 if (isPaused) {
@@ -227,7 +245,6 @@
                     clearTimeout(nextStimTimeout);
                     stimEl.style.transform = 'scale(0)';
                     
-                    // Nếu ấn tạm ngừng khi chưa bấm -> Giữ lại lượt này để chơi lại khi tiếp tục
                     if (!userResponded && currentTrial > 0) { currentTrial--; }
 
                     pauseGameBtn.innerHTML = '▶ Tiếp tục';
@@ -241,7 +258,6 @@
                     pauseOverlay.classList.remove('active');
                     actionBtn.disabled = false;
                     
-                    // Chạy lại lượt chơi sau 0.8s
                     nextStimTimeout = setTimeout(nextTrial, 800);
                 }
             });
@@ -336,6 +352,7 @@
                     else if (!isGoTrial && !userResponded) { 
                         correctCount++; 
                         updateStats(); 
+                        playTing(); // <--- THÊM TIẾNG TING KHI NHỊN BẤM ĐÚNG LÚC
                     }
                     
                     nextStimTimeout = setTimeout(nextTrial, 1000);
@@ -351,6 +368,7 @@
                 if (isGoTrial) { 
                     correctCount++; 
                     updateStats();
+                    playTing(); // <--- THÊM TIẾNG TING KHI BẤM ĐÚNG
                 } else { 
                     triggerError(); 
                 }
