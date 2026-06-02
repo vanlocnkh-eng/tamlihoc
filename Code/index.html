@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng nhập - Sàng Lọc Nhận Thức</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Nền động dải màu xanh/tím hiện đại */
+    background: linear-gradient(-45deg, #667eea, #764ba2, #6dd5ed, #2193b0);
+    background-size: 400% 400%;
+    animation: bg 12s ease infinite;
+}
+
+@keyframes bg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* === HIỆU ỨNG LIQUID GLASS === */
+.box {
+    width: 420px;
+    background: rgba(255, 255, 255, 0.25); /* Nền kính mờ trong suốt */
+    backdrop-filter: blur(15px); /* Độ mờ của kính */
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Viền sáng tạo cảm giác kính */
+    padding: 40px 35px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); /* Đổ bóng nổi khối */
+}
+
+h1 {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 25px;
+    font-size: 2em;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Đổ bóng chữ để nổi bật trên nền sáng */
+    letter-spacing: 1px;
+}
+
+input, select {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    /* Ô nhập liệu cũng làm hơi mờ */
+    background: rgba(255, 255, 255, 0.6); 
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    color: #333;
+    font-size: 16px;
+    outline: none;
+    transition: 0.3s;
+}
+
+input::placeholder {
+    color: #555;
+}
+
+input:focus, select:focus {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    /* Gradient cho nút bấm thêm phần sinh động */
+    background: linear-gradient(45deg, #0d6efd, #00d2ff); 
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.4);
+}
+
+button:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(13, 110, 253, 0.6);
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+    <h1>Đăng Nhập</h1>
+
+    <input type="text" id="name" placeholder="Họ và tên" required>
+
+    <input type="number" id="age" placeholder="Tuổi (11-15 tuổi)" required>
+
+    <input type="text" id="school" placeholder="Tên trường" required>
+
+    <input type="text" id="class" placeholder="Lớp (chỉ dành từ lớp 6-9)" required>
+
+    <select id="gender">
+        <option value="Nam">Nam</option>
+        <option value="Nữ">Nữ</option>
+    </select>
+
+    <button onclick="login()">Bắt đầu ngay 🚀</button>
+
+</div>
+
+<script>
+function login(){
+
+    let user = {
+        name: document.getElementById("name").value.trim(),
+        age: document.getElementById("age").value.trim(),
+        school: document.getElementById("school").value.trim(),
+        class: document.getElementById("class").value.trim(),
+        gender: document.getElementById("gender").value
+    };
+
+    // Kiểm tra xem đã điền đủ thông tin chưa
+    if(user.name == "" || user.age == "" || user.school == "" || user.class == ""){
+        alert("⚠️ Vui lòng nhập đầy đủ thông tin!");
+        return;
+    }
+
+    // KIỂM TRA ĐỘ TUỔI THCS
+    let userAge = parseInt(user.age, 10);
+    
+    if(userAge < 11) {
+        alert("⚠️ Không được phép tham gia khi chưa đủ độ tuổi của lứa tuổi THCS (11-15 tuổi)!");
+        return;
+    }
+    
+    if(userAge > 15) {
+        alert("⚠️ Không được phép tham gia khi vượt quá độ tuổi của lứa tuổi THCS (11-15 tuổi)!");
+        return;
+    }
+
+    // KIỂM TRA LỚP (Từ lớp 6 đến lớp 9)
+    let userClass = parseInt(user.class, 10);
+    
+    if(isNaN(userClass) || userClass < 6 || userClass > 9) {
+        alert("⚠️ Không được phép tham gia! Chỉ dành cho học sinh thuộc cấp THCS (từ lớp 6 đến lớp 9).");
+        return;
+    }
+
+    // Lưu dữ liệu vào LocalStorage để các màn hình khác sử dụng
+    localStorage.setItem("user", JSON.stringify(user));
+
+    // ĐÃ CẬP NHẬT: Chuyển hướng vào thư mục Code và mở file trangchu.html mới đổi tên
+    window.location.href = "Code/trangchu.html";
+}
+</script>
+
+</body>
+</html>
