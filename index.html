@@ -7,7 +7,7 @@
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-body { min-height: 100vh; display: flex; justify-content: center; align-items: center; background: linear-gradient(-45deg, #667eea, #764ba2, #6dd5ed, #2193b0); background-size: 400% 400%; animation: bg 12s ease infinite; }
+body { min-height: 100vh; display: flex; justify-content: center; align-items: center; background: linear-gradient(-45deg, #667eea, #764ba2, #6dd5ed, #2193b0); background-size: 400% 400%; animation: bg 12s ease infinite; overflow: hidden; }
 @keyframes bg { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 .box { width: 420px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.5); padding: 40px 35px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); }
 h1 { text-align: center; color: #ffffff; margin-bottom: 25px; font-size: 2em; text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); letter-spacing: 1px; }
@@ -16,24 +16,97 @@ input::placeholder { color: #555; }
 input:focus, select:focus { background: rgba(255, 255, 255, 0.95); border-color: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); transform: translateY(-2px); }
 button { width: 100%; padding: 14px; border: none; border-radius: 12px; background: linear-gradient(45deg, #0d6efd, #00d2ff); color: white; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 20px; transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(13, 110, 253, 0.4); }
 button:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(13, 110, 253, 0.6); }
+
+/* CSS cho hộp kiểm (Consent checkbox) */
+.consent-group { display: flex; align-items: flex-start; margin-top: 15px; gap: 10px; }
+.consent-group input[type="checkbox"] { width: 22px; height: 22px; margin: 2px 0 0 0; cursor: pointer; accent-color: #0d6efd; }
+.consent-group label { color: white; font-size: 14.5px; line-height: 1.4; cursor: pointer; text-shadow: 0 1px 2px rgba(0,0,0,0.2); text-align: left; }
+
+/* Nút phụ cho trường hợp đã đăng nhập */
+.btn-secondary { background: rgba(255, 255, 255, 0.3); color: white; box-shadow: none; margin-top: 10px; font-size: 16px; }
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.4); box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2); }
+
+/* CSS CHO BẢNG THÔNG BÁO CẬP NHẬT */
+.update-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; justify-content: center; align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.5s ease; padding: 20px; }
+.update-overlay.active { display: flex; opacity: 1; }
+.update-content { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 450px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); transform: translateY(-50px); transition: transform 0.5s ease; }
+.update-overlay.active .update-content { transform: translateY(0); }
+.update-content h2 { color: #ff4757; margin-bottom: 15px; font-size: 26px; text-shadow: none; }
+.update-content p { color: #444; margin-bottom: 25px; font-size: 16px; line-height: 1.6; }
+.update-btn { display: inline-block; padding: 14px 25px; background: linear-gradient(45deg, #ff4757, #ff6b81); color: white; text-decoration: none; font-size: 16px; font-weight: bold; border-radius: 12px; transition: 0.3s; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4); width: 100%; }
+.update-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(255, 71, 87, 0.6); }
 </style>
 </head>
 <body>
 
 <div class="box">
-    <h1>Đăng Nhập</h1>
-    <input type="text" id="name" placeholder="Họ và tên" required>
-    <input type="number" id="age" placeholder="Tuổi (11-15 tuổi)" required>
-    <input type="text" id="school" placeholder="Tên trường" required>
-    <input type="text" id="class" placeholder="Lớp (chỉ dành từ lớp 6-9)" required>
-    <select id="gender">
-        <option value="Nam">Nam</option>
-        <option value="Nữ">Nữ</option>
-    </select>
-    <button onclick="login()">Bắt đầu ngay 🚀</button>
+    <div id="welcomeBackForm" style="display: none; text-align: center;">
+        <h1>Chào mừng trở lại!</h1>
+        <h2 id="welcomeName" style="color: #fff; margin-bottom: 5px; font-size: 1.5em; text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></h2>
+        <p id="welcomeClass" style="color: #eee; margin-bottom: 25px; font-size: 1.1em;"></p>
+        
+        <button onclick="continueLogin()">Tiếp tục tham gia 🚀</button>
+        <button class="btn-secondary" onclick="showNewLogin()">Đăng nhập bằng tài khoản khác</button>
+    </div>
+
+    <div id="newLoginForm">
+        <h1>Đăng Nhập</h1>
+        <input type="text" id="name" placeholder="Họ và tên" required>
+        <input type="number" id="age" placeholder="Tuổi (11-15 tuổi)" required>
+        <input type="text" id="school" placeholder="Tên trường" required>
+        <input type="text" id="class" placeholder="Lớp (chỉ dành từ lớp 6-9)" required>
+        <select id="gender">
+            <option value="Nam">Nam</option>
+            <option value="Nữ">Nữ</option>
+        </select>
+        
+        <div class="consent-group">
+            <input type="checkbox" id="consent">
+            <label for="consent">Tôi hiểu rõ đây là công cụ hỗ trợ đánh giá nhận thức và đồng ý tham gia.</label>
+        </div>
+
+        <button onclick="login()">Bắt đầu ngay 🚀</button>
+    </div>
+</div>
+
+<div class="update-overlay" id="updateModal">
+    <div class="update-content">
+        <h2>🚀 Có Phiên Bản Mới!</h2>
+        <p>Đã có phiên bản mới của dự án. Xin mời bạn chuyển sang đường link sau để tiếp tục trải nghiệm với các tính năng tốt nhất.</p>
+        <a href="https://tamlihocduong-ngphat-tramanh.github.io/botrochoisanglockienthuc/" class="update-btn">Chuyển đến Phiên bản mới</a>
+    </div>
 </div>
 
 <script>
+// KIỂM TRA ĐĂNG NHẬP VÀ XỬ LÝ FORM
+document.addEventListener('DOMContentLoaded', () => {
+    let savedUser = localStorage.getItem("user");
+    if(savedUser) {
+        let user = JSON.parse(savedUser);
+        document.getElementById('newLoginForm').style.display = 'none';
+        document.getElementById('welcomeBackForm').style.display = 'block';
+        document.getElementById('welcomeName').textContent = user.name;
+        document.getElementById('welcomeClass').textContent = "Lớp: " + user.class + " - " + user.school;
+    }
+
+    // TÍNH NĂNG: HIỆN THÔNG BÁO CẬP NHẬT SAU 30 GIÂY
+    setTimeout(() => {
+        document.getElementById('updateModal').classList.add('active');
+    }, 30000); // 30000 mili-giây = 30 giây
+});
+
+// Chuyển thẳng tới trang chủ nếu chọn tiếp tục
+function continueLogin() {
+    window.location.href = "Code/trangchu.html";
+}
+
+// Xóa dữ liệu cũ và mở lại form đăng nhập mới
+function showNewLogin() {
+    localStorage.removeItem("user");
+    document.getElementById('welcomeBackForm').style.display = 'none';
+    document.getElementById('newLoginForm').style.display = 'block';
+}
+
 function login(){
     let user = {
         name: document.getElementById("name").value.trim(),
@@ -57,6 +130,12 @@ function login(){
         alert("⚠️ Không được phép tham gia! Chỉ dành cho học sinh thuộc cấp THCS (từ lớp 6 đến lớp 9)."); return;
     }
 
+    // Kiểm tra tick ô đồng ý
+    if(!document.getElementById("consent").checked) {
+        alert("⚠️ Bạn cần xác nhận đồng ý tham gia ở hộp kiểm phía trên nút Bắt đầu!"); return;
+    }
+
+    // Lưu thông tin vào bộ nhớ đệm
     localStorage.setItem("user", JSON.stringify(user));
 
     // Đi vào thư mục Code để mở trang chủ
