@@ -44,16 +44,19 @@ footer { text-align: center; padding: 20px 0 10px 0; color: rgba(51, 51, 51, 0.8
 .contact-item:hover .icon-wrapper, .contact-item:active .icon-wrapper { transform: scale(1.1); }
 .contact-item:hover .contact-info, .contact-item:active .contact-info { opacity: 1; visibility: visible; transform: translateX(0); right: 70px; }
 
-/* THANH BÊN TRÁI (PHẢN HỒI) */
+/* THANH BÊN TRÁI (PHẢN HỒI & BẢNG XẾP HẠNG) */
 .floating-left { position: fixed; left: 20px; bottom: 40px; display: flex; flex-direction: column; gap: 20px; z-index: 1000; }
 .left-item { position: relative; display: flex; align-items: center; justify-content: flex-start; cursor: pointer; }
 .left-item.feedback .icon-wrapper { background-color: #17a2b8; animation: pulse-feedback 2s infinite;}
 .left-item.rating .icon-wrapper { background-color: #ffc107; color: #fff; animation: pulse-rating 2s infinite; animation-delay: 1s;}
+.left-item.leaderboard .icon-wrapper { background-color: #f39c12; color: #fff; animation: pulse-leaderboard 2s infinite; animation-delay: 0.5s;}
 @keyframes pulse-feedback { 0% { box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(23, 162, 184, 0); } 100% { box-shadow: 0 0 0 0 rgba(23, 162, 184, 0); } }
 @keyframes pulse-rating { 0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 193, 7, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); } }
+@keyframes pulse-leaderboard { 0% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(243, 156, 18, 0); } 100% { box-shadow: 0 0 0 0 rgba(243, 156, 18, 0); } }
 .left-info { position: absolute; left: 50px; color: white; padding: 10px 15px 10px 25px; border-radius: 0 25px 25px 0; font-weight: bold; font-size: 16px; opacity: 0; visibility: hidden; transform: translateX(-20px); transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.15); z-index: 1; }
 .left-item.feedback .left-info { background-color: #17a2b8; }
 .left-item.rating .left-info { background-color: #ffc107; color: #333;}
+.left-item.leaderboard .left-info { background-color: #f39c12; color: #fff;}
 .left-item:hover .icon-wrapper, .left-item:active .icon-wrapper { transform: scale(1.1); }
 .left-item:hover .left-info, .left-item:active .left-info { opacity: 1; visibility: visible; transform: translateX(0); left: 70px; }
 
@@ -114,7 +117,6 @@ footer { text-align: center; padding: 20px 0 10px 0; color: rgba(51, 51, 51, 0.8
 }
 .music-select:focus, .music-select:hover { border-color: #0b5ed7; }
 
-/* Cập nhật class music-btn thành hình tròn */
 .music-btn {
     width: 42px; 
     height: 42px; 
@@ -198,6 +200,9 @@ footer { text-align: center; padding: 20px 0 10px 0; color: rgba(51, 51, 51, 0.8
     <div class="left-item rating" onclick="openModal('ratingModal')">
         <div class="icon-wrapper"><i class="fa-solid fa-star"></i></div> <span class="left-info">Đánh giá trải nghiệm</span>
     </div>
+    <div class="left-item leaderboard" onclick="showLeaderboard()">
+        <div class="icon-wrapper"><i class="fa-solid fa-trophy"></i></div> <span class="left-info">Bảng Xếp Hạng Tổng Hợp</span>
+    </div>
 </div>
 
 <div class="floating-contact">
@@ -209,14 +214,26 @@ footer { text-align: center; padding: 20px 0 10px 0; color: rgba(51, 51, 51, 0.8
     </div>
 </div>
 
+<div class="modal-overlay" id="leaderboardModal">
+    <div class="modal-content">
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal('leaderboardModal')"></i>
+        <h3 class="modal-title" style="color: #f39c12;">🏆 BẢNG XẾP HẠNG TỔNG HỢP TOP 10</h3>
+        <p style="margin-bottom: 15px; color: #555; font-size: 0.9em;"><i>(Điểm trung bình của Game 1, 2, 3 và 5)</i></p>
+        <div id="leaderboardContent" style="text-align: left; max-height: 350px; overflow-y: auto;">
+            Đang tải dữ liệu...
+        </div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="introModal">
     <div class="modal-content intro-modal-content">
         <i class="fa-solid fa-xmark modal-close" onclick="closeModal('introModal')"></i>
         <h3 class="modal-title">📘 Giới Thiệu Dự Án</h3>
         
         <div class="intro-text">
-            <p>Ở lứa tuổi trung học cơ sở (THCS), nhiều yếu tố như căng thẳng học tập, thiếu ngủ, xung đột bạn bè hoặc thay đổi nội tiết có thể làm xuất hiện các biểu hiện khó chịu về cảm xúc và suy giảm tạm thời một số chức năng nhận thức (chú ý, trí nhớ, kiểm soát hành vi). Một tỷ lệ rất nhỏ học sinh có thể gặp các “trải nghiệm tâm lý bất thường ở mức sớm” (ví dụ: cảm giác bị quan sát, nghe thấy tiếng gọi thoáng qua, nghi ngờ quá mức) và nếu các trải nghiệm này lặp lại, tăng dần hoặc đi kèm suy giảm học tập thì cần được theo dõi và tư vấn chuyên môn.</p>
-            <p>Đề tài xây dựng bộ 05 trò chơi nhận thức (Memory, Go/No-Go, N-back, Trail Making, Flexibility) phù hợp học sinh THCS nhằm thu thập tự động các chỉ số định lượng (thời gian phản ứng, số lỗi, tỷ lệ bỏ sót/nhấn nhầm…), từ đó tính chỉ số nguy cơ tổng hợp để phân loại 3 mức theo dõi trong nhà trường. Công cụ hướng tới hỗ trợ phòng tư vấn học đường phát hiện sớm nhóm học sinh cần quan tâm, và luôn nhấn mạnh: đây là công cụ sàng lọc hỗ trợ, không phải chẩn đoán; mọi trường hợp mức cao cần được trao đổi với phụ huynh và tham vấn với chuyên gia chuyên khoa khi cần.</p>
+            <p>🎯 <strong>Mục tiêu:</strong> Dự án xây dựng <strong>05 trò chơi nhận thức</strong> (Memory, Go/No-Go, N-back, Trail Making, Flexibility) nhằm hỗ trợ đo lường các chỉ số như thời gian phản ứng, độ chính xác và khả năng tập trung của học sinh Trung học cơ sở (THCS).</p>
+            <p>📊 <strong>Ứng dụng:</strong> Từ kết quả chơi, hệ thống tự động tính toán chỉ số và phân loại nguy cơ suy giảm nhận thức/tâm lý thành 3 mức độ. Qua đó, hỗ trợ phòng tư vấn học đường phát hiện sớm các học sinh cần được quan tâm.</p>
+            <p style="background: rgba(255, 71, 87, 0.1); border-left-color: #ff4757; color: #d63031;">⚠️ <strong>Lưu ý:</strong> Đây chỉ là <em>công cụ sàng lọc hỗ trợ</em>, không thay thế chẩn đoán y khoa. Trường hợp có nguy cơ cao cần được tư vấn chuyên sâu bởi chuyên gia.</p>
 
             <h4 style="color:#0d6efd; margin-top: 25px; margin-bottom: 10px; font-size: 1.2em;">👨‍💻 Thông tin nhóm phát triển</h4>
             <div class="author-info">
@@ -304,7 +321,7 @@ function updateStars(rating) {
 // ==========================================
 // TÍCH HỢP GOOGLE SHEETS
 // ==========================================
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtrMg-16HQ8i1M3rQExrM-WmeKYjfSqQ9rxsGV9RzGl-RaLaE72nsqbNJ6OG8rgVAtxQ/exec"; 
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyH3Pv8-yCQvcfBcB2LseDGWhRjvbrTU9kMGNmL9hLvdMyxqkvVJd6Sd4T2iITa1CHx7A/exec"; 
 
 function submitFeedback() {
     let general = document.getElementById("fb-general").value;
@@ -347,6 +364,48 @@ function submitRating() {
 }
 
 // ==========================================
+// LOGIC BẢNG XẾP HẠNG TỔNG HỢP
+// ==========================================
+function showLeaderboard() {
+    openModal('leaderboardModal');
+    let lbContent = document.getElementById("leaderboardContent");
+    lbContent.innerHTML = "<p style='text-align:center;'>🔄 Đang lấy dữ liệu từ hệ thống...</p>";
+    
+    // GỌI DATA TỪ GOOGLE SHEETS BẰNG action=get_total_leaderboard
+    fetch(SCRIPT_URL + "?action=get_total_leaderboard")
+        .then(response => response.json())
+        .then(data => {
+            if (!data || data.length === 0) {
+                lbContent.innerHTML = "<p style='text-align:center; color: #555;'>Chưa có dữ liệu người chơi nào.</p>";
+                return;
+            }
+            
+            let html = "<ul style='list-style-type: none; padding: 0; font-size: 1.1em; line-height: 1.8;'>";
+            
+            // Lấy 10 kết quả đầu tiên trả về
+            data.slice(0, 10).forEach((item, index) => {
+                let medal = "";
+                if(index === 0) medal = "🥇";
+                else if(index === 1) medal = "🥈";
+                else if(index === 2) medal = "🥉";
+                else medal = `<span style="display:inline-block; width: 25px; text-align:center;">${index + 1}</span>`;
+                
+                html += `
+                    <li style="padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                        <span>${medal} <b>${item.name}</b></span>
+                        <span style="color: #0d6efd; font-weight: bold;">Điểm TB: ${item.averageScore}</span>
+                    </li>`;
+            });
+            html += "</ul>";
+            
+            lbContent.innerHTML = html;
+        })
+        .catch(err => {
+            lbContent.innerHTML = "<p style='text-align:center; color: #ff4757;'>❌ Lỗi khi tải dữ liệu! Vui lòng thử lại sau.</p>";
+        });
+}
+
+// ==========================================
 // TÍNH NĂNG BẬT/TẮT VÀ LỰA CHỌN NHẠC NỀN
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -355,13 +414,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const musicSelect = document.getElementById('musicSelect');
     let isMusicPlaying = false;
     
-    // Điều chỉnh âm lượng (0.3 = 30%)
     bgMusic.volume = 0.3; 
 
-    // Hàm gọi nhạc phát
     function playMusic() {
         bgMusic.play().then(() => {
-            // Thay đổi để chỉ hiển thị icon
             musicToggleBtn.innerHTML = '🎵';
             musicToggleBtn.classList.add('playing');
             isMusicPlaying = true;
@@ -371,19 +427,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Khi người dùng thay đổi bài hát trong menu Dropdown
     musicSelect.addEventListener('change', (e) => {
         bgMusic.src = e.target.value;
-        if (isMusicPlaying) {
-            playMusic();
-        }
+        if (isMusicPlaying) playMusic();
     });
 
-    // Nút Bật / Tắt nhạc
     musicToggleBtn.addEventListener('click', () => {
         if (isMusicPlaying) {
             bgMusic.pause();
-            // Thay đổi để chỉ hiển thị icon
             musicToggleBtn.innerHTML = '🔇';
             musicToggleBtn.classList.remove('playing');
             isMusicPlaying = false;
