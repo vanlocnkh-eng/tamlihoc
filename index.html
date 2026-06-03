@@ -32,9 +32,12 @@ button:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px r
 .update-content { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 450px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); transform: translateY(-50px); transition: transform 0.5s ease; }
 .update-overlay.active .update-content { transform: translateY(0); }
 .update-content h2 { color: #ff4757; margin-bottom: 15px; font-size: 26px; text-shadow: none; }
-.update-content p { color: #444; margin-bottom: 25px; font-size: 16px; line-height: 1.6; }
+.update-content p { color: #444; margin-bottom: 20px; font-size: 16px; line-height: 1.6; }
 .update-btn { display: inline-block; padding: 14px 25px; background: linear-gradient(45deg, #ff4757, #ff6b81); color: white; text-decoration: none; font-size: 16px; font-weight: bold; border-radius: 12px; transition: 0.3s; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4); width: 100%; }
 .update-btn:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px rgba(255, 71, 87, 0.6); }
+
+/* Chữ đếm ngược */
+.countdown-text { color: #e67e22; font-size: 1.3em; font-weight: bold; margin-bottom: 25px; padding: 10px; background: #fff3e0; border-radius: 10px; border: 2px dashed #f39c12; }
 </style>
 </head>
 <body>
@@ -69,11 +72,18 @@ button:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 8px 25px r
     </div>
 </div>
 
+<!-- MODAL CẬP NHẬT PHIÊN BẢN MỚI -->
 <div class="update-overlay" id="updateModal">
     <div class="update-content">
         <h2>🚀 Có Phiên Bản Mới!</h2>
-        <p>Đã có phiên bản mới của dự án. Xin mời bạn chuyển sang đường link sau để tiếp tục trải nghiệm với các tính năng tốt nhất.</p>
-        <a href="https://tamlihocduong-ngphat-tramanh.github.io/botrochoisanglockienthuc/" class="update-btn">Chuyển đến Phiên bản mới</a>
+        <p>Hệ thống đã được nâng cấp. Xin mời bạn chuyển sang đường link mới để tiếp tục trải nghiệm với các tính năng tốt nhất.</p>
+        
+        <!-- Hiển thị bộ đếm ngược -->
+        <div class="countdown-text">
+            Tự động chuyển trang sau: <span id="countdownNumber" style="font-size: 1.5em;">30</span> giây
+        </div>
+
+        <a href="https://tamlihocduong-ngphat-tramanh.github.io/botrochoisanglockienthuc/" class="update-btn">Chuyển đến Phiên bản mới ngay</a>
     </div>
 </div>
 
@@ -89,13 +99,26 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('welcomeClass').textContent = "Lớp: " + user.class + " - " + user.school;
     }
 
-    // TÍNH NĂNG: HIỆN THÔNG BÁO CẬP NHẬT SAU 30 GIÂY
-    setTimeout(() => {
-        document.getElementById('updateModal').classList.add('active');
-    }, 30000); // 30000 mili-giây = 30 giây
+    // TÍNH NĂNG: HIỆN THÔNG BÁO CẬP NHẬT NGAY LẬP TỨC
+    document.getElementById('updateModal').classList.add('active');
+
+    // BẮT ĐẦU ĐẾM NGƯỢC 30 GIÂY
+    let count = 30;
+    let countDisplay = document.getElementById('countdownNumber');
+    
+    let redirectTimer = setInterval(() => {
+        count--;
+        countDisplay.textContent = count;
+        
+        // Hết 30 giây thì tự động chuyển trang
+        if (count <= 0) {
+            clearInterval(redirectTimer);
+            window.location.href = "https://tamlihocduong-ngphat-tramanh.github.io/botrochoisanglockienthuc/";
+        }
+    }, 1000); // 1000 mili-giây = 1 giây
 });
 
-// Chuyển thẳng tới trang chủ nếu chọn tiếp tục
+// Chuyển thẳng tới trang chủ nếu chọn tiếp tục (Dành cho code cũ, bị bảng cập nhật đè lên rồi)
 function continueLogin() {
     window.location.href = "Code/trangchu.html";
 }
